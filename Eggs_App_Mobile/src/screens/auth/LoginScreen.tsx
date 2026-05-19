@@ -25,8 +25,11 @@ export default function LoginScreen() {
         }
         setLoading(true);
         try {
+            console.log('📱 Llamando login...');
             await login(username, password);
+            console.log('🏠 Login exitoso, navegando...');
         } catch (error) {
+            console.log('❌ Error:', error);
             Alert.alert('Error', 'Usuario o contraseña incorrectos.');
         } finally {
             setLoading(false);

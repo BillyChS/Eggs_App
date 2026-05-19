@@ -24,7 +24,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+    <PackageReference Include="Microsoft.OpenApi" Version="1.6.14" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
     <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />

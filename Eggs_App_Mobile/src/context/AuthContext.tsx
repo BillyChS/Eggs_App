@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { login as loginService } from '../services/AuthService';
+import { login as loginService } from '../services/authService';
 
 interface AuthContextType {
     token: string | null;
@@ -25,9 +25,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const login = async (username: string, password: string) => {
+        console.log('🔐 Iniciando login...');
         const jwt = await loginService(username, password);
+        console.log('✅ Token recibido:', jwt);
         await AsyncStorage.setItem('token', jwt);
+        console.log('💾 Token guardado en AsyncStorage');
         setToken(jwt);
+        console.log('🔄 Estado actualizado');
     };
 
     const logout = async () => {
