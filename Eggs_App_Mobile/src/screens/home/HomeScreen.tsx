@@ -1,13 +1,22 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 
-export default function HomeScreen() {
+// Props from the stack navigator
+export default function HomeScreen({ navigation }: any) {
+    // Get logout function from auth context
     const { logout } = useAuth();
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* Top navigation bar */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>🥚 Eggs App</Text>
                 <TouchableOpacity onPress={logout}>
@@ -16,14 +25,17 @@ export default function HomeScreen() {
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
+                {/* Current month label */}
                 <Text style={styles.monthLabel}>Mayo 2026</Text>
 
+                {/* Main profit card */}
                 <View style={styles.mainCard}>
                     <Text style={styles.mainCardLabel}>Ganancia del mes</Text>
                     <Text style={styles.mainCardValue}>₡ 0</Text>
                     <Text style={styles.mainCardSub}>Sin registros aún</Text>
                 </View>
 
+                {/* Sales and expenses summary cards */}
                 <View style={styles.statsRow}>
                     <View style={styles.statCard}>
                         <Text style={styles.statLabel}>Ventas</Text>
@@ -37,10 +49,15 @@ export default function HomeScreen() {
 
                 <Text style={styles.sectionTitle}>ACCIONES RÁPIDAS</Text>
 
-                <TouchableOpacity style={styles.primaryButton}>
+                {/* Navigate to create sale screen */}
+                <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={() => navigation.navigate('CreateSale')}
+                >
                     <Text style={styles.primaryButtonText}>+ Registrar venta</Text>
                 </TouchableOpacity>
 
+                {/* Navigate to create expense screen — coming soon */}
                 <TouchableOpacity style={styles.secondaryButton}>
                     <Text style={styles.secondaryButtonText}>− Registrar gasto</Text>
                 </TouchableOpacity>

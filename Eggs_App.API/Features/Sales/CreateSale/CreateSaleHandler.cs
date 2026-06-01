@@ -29,7 +29,8 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, int>
             Quantity = request.Quantity,
             PricePerCarton = request.PricePerCarton,
             TotalAmount = request.Quantity * request.PricePerCarton,
-            SaleDate = DateTime.UtcNow,
+            // Use local time instead of UTC to avoid timezone issues
+            SaleDate = DateTime.Now,
             UserId = userId
         };
 
