@@ -12,13 +12,14 @@ import {
     View,
 } from 'react-native';
 import { createSale } from '../../services/salesService';
+import HomeButton from '../../components/HomeButton';
+import ScreenHeader from '../../components/ScreenHeader';
 
 export default function CreateSaleScreen({ navigation }: any) {
     const [cartonType, setCartonType] = useState<15 | 30>(15);
     const [quantity, setQuantity] = useState('');
     const [price, setPrice] = useState('');
     const [loading, setLoading] = useState(false);
-
     const total = (parseInt(quantity) || 0) * (parseFloat(price) || 0);
 
     const handleSave = () => {
@@ -55,100 +56,91 @@ export default function CreateSaleScreen({ navigation }: any) {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Text style={styles.backText}>← Volver</Text>
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Registrar venta</Text>
-                <View style={{ width: 60 }} />
-            </View>
+            <ScreenHeader title="Registrar venta" />
 
-            <ScrollView contentContainerStyle={styles.content}>
-                <Text style={styles.label}>Tipo de cartón</Text>
-                <View style={styles.typeSelector}>
-                    <TouchableOpacity
-                        style={[styles.typeOpt, cartonType === 15 && styles.typeOptSelected]}
-                        onPress={() => setCartonType(15)}
-                    >
-                        <Text style={[styles.typeOptText, cartonType === 15 && styles.typeOptTextSelected]}>
-                            15 unidades
-                        </Text>
-                        <Text style={styles.typeOptSub}>Cartón pequeño</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.typeOpt, cartonType === 30 && styles.typeOptSelected]}
-                        onPress={() => setCartonType(30)}
-                    >
-                        <Text style={[styles.typeOptText, cartonType === 30 && styles.typeOptTextSelected]}>
-                            30 unidades
-                        </Text>
-                        <Text style={styles.typeOptSub}>Cartón grande</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <Text style={styles.label}>Cantidad de cartones</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="0"
-                    placeholderTextColor="#888"
-                    keyboardType="numeric"
-                    value={quantity}
-                    onChangeText={setQuantity}
-                />
-
-                <Text style={styles.label}>Precio por cartón (₡)</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="0"
-                    placeholderTextColor="#888"
-                    keyboardType="numeric"
-                    value={price}
-                    onChangeText={setPrice}
-                />
-
-                {total > 0 && (
-                    <View style={styles.totalCard}>
-                        <Text style={styles.totalLabel}>Total a registrar</Text>
-                        <Text style={styles.totalValue}>₡ {total.toLocaleString('es-CR')}</Text>
+            <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+                <ScrollView
+                    style={styles.container}
+                    contentContainerStyle={styles.content}
+                >
+                    <Text style={styles.label}>Tipo de cartón</Text>
+                    <View style={styles.typeSelector}>
+                        <TouchableOpacity
+                            style={[styles.typeOpt, cartonType === 15 && styles.typeOptSelected]}
+                            onPress={() => setCartonType(15)}
+                        >
+                            <Text style={[styles.typeOptText, cartonType === 15 && styles.typeOptTextSelected]}>
+                                15 unidades
+                            </Text>
+                            <Text style={styles.typeOptSub}>Cartón pequeño</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.typeOpt, cartonType === 30 && styles.typeOptSelected]}
+                            onPress={() => setCartonType(30)}
+                        >
+                            <Text style={[styles.typeOptText, cartonType === 30 && styles.typeOptTextSelected]}>
+                                30 unidades
+                            </Text>
+                            <Text style={styles.typeOptSub}>Cartón grande</Text>
+                        </TouchableOpacity>
                     </View>
-                )}
 
-                <TouchableOpacity
-                    style={styles.primaryButton}
-                    onPress={handleSave}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.primaryButtonText}>Guardar venta</Text>
+                    <Text style={styles.label}>Cantidad de cartones</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="0"
+                        placeholderTextColor="#888"
+                        keyboardType="numeric"
+                        value={quantity}
+                        onChangeText={setQuantity}
+                    />
+
+                    <Text style={styles.label}>Precio por cartón (₡)</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="0"
+                        placeholderTextColor="#888"
+                        keyboardType="numeric"
+                        value={price}
+                        onChangeText={setPrice}
+                    />
+
+                    {total > 0 && (
+                        <View style={styles.totalCard}>
+                            <Text style={styles.totalLabel}>Total a registrar</Text>
+                            <Text style={styles.totalValue}>₡ {total.toLocaleString('es-CR')}</Text>
+                        </View>
                     )}
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={styles.secondaryButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Text style={styles.secondaryButtonText}>Cancelar</Text>
-                </TouchableOpacity>
-            </ScrollView>
+                    <TouchableOpacity
+                        style={styles.primaryButton}
+                        onPress={handleSave}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.primaryButtonText}>Guardar venta</Text>
+                        )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.secondaryButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Text style={styles.secondaryButtonText}>Cancelar</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+
+                <HomeButton />
+            </View>
         </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f5f5f5' },
-    header: {
-        backgroundColor: '#1a1a2e',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-    },
-    backText: { color: '#fff', fontSize: 14 },
-    headerTitle: { color: '#fff', fontSize: 16, fontWeight: '500' },
-    content: { padding: 16 },
+    content: { padding: 20, paddingBottom: 100 },
     label: { fontSize: 13, color: '#888', marginBottom: 6, marginTop: 4 },
     typeSelector: { flexDirection: 'row', gap: 10, marginBottom: 16 },
     typeOpt: {

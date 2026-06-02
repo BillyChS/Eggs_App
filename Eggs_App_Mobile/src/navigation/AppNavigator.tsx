@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import HomeScreen from '../screens/home/HomeScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import CreateSaleScreen from '../screens/sales/CreateSaleScreen';
+import CreateExpenseScreen from '../screens/expenses/CreateExpenseScreen';
+import SummaryScreen from '../screens/reports/SummaryScreen';
 
 // Stack navigator instance with typed routes
 const Stack = createNativeStackNavigator();
@@ -31,6 +33,8 @@ export default function AppNavigator() {
                     <>
                         <Stack.Screen name="Home" component={HomeScreen} />
                         <Stack.Screen name="CreateSale" component={CreateSaleScreen} />
+                        <Stack.Screen name="CreateExpense" component={CreateExpenseScreen} />
+                        <Stack.Screen name="Summary" component={SummaryScreen} />
                     </>
                 ) : (
                     // Public screens — accessible without token

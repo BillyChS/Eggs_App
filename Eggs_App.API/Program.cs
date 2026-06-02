@@ -1,3 +1,4 @@
+using Eggs_App.API.Features.Reports;
 using Eggs_App.API.Infrastructure.Data;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -71,6 +72,7 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+app.MapReportsEndpoints();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

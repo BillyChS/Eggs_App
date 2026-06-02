@@ -19,7 +19,7 @@ export default function HomeScreen({ navigation }: any) {
             {/* Top navigation bar */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>🥚 Eggs App</Text>
-                <TouchableOpacity onPress={logout}>
+                <TouchableOpacity style={styles.logoutButton} onPress={logout} activeOpacity={0.7}>
                     <Text style={styles.logoutText}>Salir</Text>
                 </TouchableOpacity>
             </View>
@@ -57,9 +57,22 @@ export default function HomeScreen({ navigation }: any) {
                     <Text style={styles.primaryButtonText}>+ Registrar venta</Text>
                 </TouchableOpacity>
 
-                {/* Navigate to create expense screen — coming soon */}
-                <TouchableOpacity style={styles.secondaryButton}>
+                {/* Navigate to create expense screen */}
+                <TouchableOpacity
+                    style={styles.secondaryButton}
+                    onPress={() => navigation.navigate('CreateExpense')}
+                >
                     <Text style={styles.secondaryButtonText}>− Registrar gasto</Text>
+                </TouchableOpacity>
+
+                {/* Navigate to summary screen */}
+                <TouchableOpacity
+                    style={styles.summaryButton}
+                    onPress={() => navigation.navigate('Summary')}
+                    activeOpacity={0.85}
+                >
+                    <Text style={styles.summaryIcon}>📊</Text>
+                    <Text style={styles.summaryButtonText}>Ver resumen mensual</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
@@ -77,7 +90,13 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
     },
     headerTitle: { color: '#fff', fontSize: 18, fontWeight: '500' },
-    logoutText: { color: '#fff', fontSize: 14 },
+    logoutButton: {
+        backgroundColor: '#c0392b',   // red = salir, fácil de identificar
+        paddingVertical: 8,
+        paddingHorizontal: 18,
+        borderRadius: 20,
+    },
+    logoutText: { color: '#fff', fontSize: 18, fontWeight: '700' },
     content: { padding: 16 },
     monthLabel: {
         fontSize: 14,
@@ -132,4 +151,21 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     secondaryButtonText: { color: '#1a1a2e', fontSize: 16 },
+    summaryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#1e8449',   // verde fuerte, fácil de identificar
+        paddingVertical: 18,
+        paddingHorizontal: 24,
+        borderRadius: 16,
+        marginVertical: 10,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    summaryIcon: { fontSize: 24, marginRight: 12 },
+    summaryButtonText: { fontSize: 20, fontWeight: '700', color: '#fff' },
 });
