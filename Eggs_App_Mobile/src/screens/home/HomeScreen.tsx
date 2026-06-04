@@ -1,29 +1,30 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useAuth } from '../../context/AuthContext';
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 
-export default function HomeScreen() {
-    const { logout } = useAuth();
-
+export default function HomeScreen({ navigation }: any) {
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>🥚 Eggs App</Text>
-                <TouchableOpacity onPress={logout}>
-                    <Text style={styles.logoutText}>Salir</Text>
-                </TouchableOpacity>
-            </View>
+        <View style={styles.container}>
+            <ScreenHeader title="🥚 Eggs App" showBack={false} />
 
             <ScrollView contentContainerStyle={styles.content}>
+                {/* Current month label */}
                 <Text style={styles.monthLabel}>Mayo 2026</Text>
 
+                {/* Main profit card */}
                 <View style={styles.mainCard}>
                     <Text style={styles.mainCardLabel}>Ganancia del mes</Text>
                     <Text style={styles.mainCardValue}>₡ 0</Text>
                     <Text style={styles.mainCardSub}>Sin registros aún</Text>
                 </View>
 
+                {/* Sales and expenses summary cards */}
                 <View style={styles.statsRow}>
                     <View style={styles.statCard}>
                         <Text style={styles.statLabel}>Ventas</Text>
@@ -37,30 +38,38 @@ export default function HomeScreen() {
 
                 <Text style={styles.sectionTitle}>ACCIONES RÁPIDAS</Text>
 
-                <TouchableOpacity style={styles.primaryButton}>
+                {/* Navigate to create sale screen */}
+                <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={() => navigation.navigate('CreateSale')}
+                >
                     <Text style={styles.primaryButtonText}>+ Registrar venta</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.secondaryButton}>
+                {/* Navigate to create expense screen */}
+                <TouchableOpacity
+                    style={styles.secondaryButton}
+                    onPress={() => navigation.navigate('CreateExpense')}
+                >
                     <Text style={styles.secondaryButtonText}>− Registrar gasto</Text>
                 </TouchableOpacity>
+
+                {/* Navigate to summary screen */}
+                <TouchableOpacity
+                    style={styles.summaryButton}
+                    onPress={() => navigation.navigate('Summary')}
+                    activeOpacity={0.85}
+                >
+                    <Text style={styles.summaryIcon}>📊</Text>
+                    <Text style={styles.summaryButtonText}>Ver resumen mensual</Text>
+                </TouchableOpacity>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f5f5f5' },
-    header: {
-        backgroundColor: '#1a1a2e',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-    },
-    headerTitle: { color: '#fff', fontSize: 18, fontWeight: '500' },
-    logoutText: { color: '#fff', fontSize: 14 },
     content: { padding: 16 },
     monthLabel: {
         fontSize: 14,
@@ -115,4 +124,21 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     secondaryButtonText: { color: '#1a1a2e', fontSize: 16 },
+    summaryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#1e8449',
+        paddingVertical: 18,
+        paddingHorizontal: 24,
+        borderRadius: 16,
+        marginVertical: 10,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    summaryIcon: { fontSize: 24, marginRight: 12 },
+    summaryButtonText: { fontSize: 20, fontWeight: '700', color: '#fff' },
 });

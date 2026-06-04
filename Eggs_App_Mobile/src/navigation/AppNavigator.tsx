@@ -1,16 +1,22 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import HomeScreen from '../screens/home/HomeScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
-import { ActivityIndicator, View } from 'react-native';
+import CreateSaleScreen from '../screens/sales/CreateSaleScreen';
+import CreateExpenseScreen from '../screens/expenses/CreateExpenseScreen';
+import SummaryScreen from '../screens/reports/SummaryScreen';
 
+// Stack navigator instance with typed routes
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
+    // Get token and loading state from auth context
     const { token, isLoading } = useAuth();
 
+    // Show spinner while token is being loaded from AsyncStorage
     if (isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -23,8 +29,15 @@ export default function AppNavigator() {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {token ? (
-                    <Stack.Screen name="Home" component={HomeScreen} />
+                    // Authenticated screens — only accessible with valid token
+                    <>
+                        <Stack.Screen name="Home" component={HomeScreen} />
+                        <Stack.Screen name="CreateSale" component={CreateSaleScreen} />
+                        <Stack.Screen name="CreateExpense" component={CreateExpenseScreen} />
+                        <Stack.Screen name="Summary" component={SummaryScreen} />
+                    </>
                 ) : (
+                    // Public screens — accessible without token
                     <Stack.Screen name="Login" component={LoginScreen} />
                 )}
             </Stack.Navigator>
