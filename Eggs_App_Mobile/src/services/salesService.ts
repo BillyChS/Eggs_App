@@ -1,21 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-
-const API_URL = 'http://192.168.100.125:5243/api';
-
-const getAuthHeader = async () => {
-    const token = await AsyncStorage.getItem('token');
-    return { Authorization: `Bearer ${token}` };
-};
+import client from '../api/client';
 
 export const createSale = async (cartonType: number, quantity: number, pricePerCarton: number) => {
-    const headers = await getAuthHeader();
-    const response = await axios.post(`${API_URL}/Sales`, { cartonType, quantity, pricePerCarton }, { headers });
+    const response = await client.post('/Sales', { cartonType, quantity, pricePerCarton });
     return response.data;
 };
 
 export const getSales = async (month: number, year: number) => {
-    const headers = await getAuthHeader();
-    const response = await axios.get(`${API_URL}/Sales?month=${month}&year=${year}`, { headers });
+    const response = await client.get(`/Sales?month=${month}&year=${year}`);
     return response.data;
 };

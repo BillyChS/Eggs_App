@@ -1,12 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-
-const API_URL = 'http://192.168.100.125:5243/api';
-
-const getAuthHeader = async () => {
-    const token = await AsyncStorage.getItem('token');
-    return { Authorization: `Bearer ${token}` };
-};
+import client from '../api/client';
 
 // Shape of each expense category row in the summary
 export interface CategoryTotal {
@@ -28,10 +20,6 @@ export const getMonthlySummary = async (
     month: number,
     year: number
 ): Promise<MonthlySummary> => {
-    const headers = await getAuthHeader();
-    const response = await axios.get(
-        `${API_URL}/reports/summary?month=${month}&year=${year}`,
-        { headers }
-    );
+    const response = await client.get(`/reports/summary?month=${month}&year=${year}`);
     return response.data;
 };
