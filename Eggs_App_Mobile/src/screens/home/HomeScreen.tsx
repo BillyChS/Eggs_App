@@ -1,28 +1,17 @@
 import React from 'react';
 import {
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useAuth } from '../../context/AuthContext';
+import ScreenHeader from '../../components/ScreenHeader';
 
-// Props from the stack navigator
 export default function HomeScreen({ navigation }: any) {
-    // Get logout function from auth context
-    const { logout } = useAuth();
-
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Top navigation bar */}
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>🥚 Eggs App</Text>
-                <TouchableOpacity style={styles.logoutButton} onPress={logout} activeOpacity={0.7}>
-                    <Text style={styles.logoutText}>Salir</Text>
-                </TouchableOpacity>
-            </View>
+        <View style={styles.container}>
+            <ScreenHeader title="🥚 Eggs App" showBack={false} />
 
             <ScrollView contentContainerStyle={styles.content}>
                 {/* Current month label */}
@@ -75,28 +64,12 @@ export default function HomeScreen({ navigation }: any) {
                     <Text style={styles.summaryButtonText}>Ver resumen mensual</Text>
                 </TouchableOpacity>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f5f5f5' },
-    header: {
-        backgroundColor: '#1a1a2e',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-    },
-    headerTitle: { color: '#fff', fontSize: 18, fontWeight: '500' },
-    logoutButton: {
-        backgroundColor: '#c0392b',   // red = salir, fácil de identificar
-        paddingVertical: 8,
-        paddingHorizontal: 18,
-        borderRadius: 20,
-    },
-    logoutText: { color: '#fff', fontSize: 18, fontWeight: '700' },
     content: { padding: 16 },
     monthLabel: {
         fontSize: 14,
@@ -155,7 +128,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#1e8449',   // verde fuerte, fácil de identificar
+        backgroundColor: '#1e8449',
         paddingVertical: 18,
         paddingHorizontal: 24,
         borderRadius: 16,
