@@ -14,12 +14,16 @@ import {
 import { createExpense } from '../../services/expensesService';
 import HomeButton from '../../components/HomeButton';
 import ScreenHeader from '../../components/ScreenHeader';
+import { useTheme } from '../../theme/ThemeContext';
+import { Theme } from '../../theme/colors';
 
 export default function CreateExpenseScreen({ navigation }: any) {
+    const { theme } = useTheme();
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
+    const s = makeStyles(theme);
 
     // Handle save with confirmation dialog
     const handleSave = () => {
@@ -59,42 +63,42 @@ export default function CreateExpenseScreen({ navigation }: any) {
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
+            style={s.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScreenHeader title="Registrar gasto" />
 
-            <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-                <ScrollView contentContainerStyle={styles.content}>
+            <View style={{ flex: 1, backgroundColor: theme.background }}>
+                <ScrollView contentContainerStyle={s.content}>
                     {/* Expense name */}
-                    <Text style={styles.label}>Nombre del gasto</Text>
+                    <Text style={s.label}>Nombre del gasto</Text>
                     <TextInput
-                        style={styles.input}
+                        style={s.input}
                         placeholder="Ej: Alimento para gallinas"
-                        placeholderTextColor="#888"
+                        placeholderTextColor={theme.textMuted}
                         value={name}
                         onChangeText={setName}
                     />
 
                     {/* Amount in colones */}
-                    <Text style={styles.label}>Monto (₡)</Text>
+                    <Text style={s.label}>Monto (₡)</Text>
                     <TextInput
-                        style={styles.input}
+                        style={s.input}
                         placeholder="0"
-                        placeholderTextColor="#888"
+                        placeholderTextColor={theme.textMuted}
                         keyboardType="numeric"
                         value={amount}
                         onChangeText={setAmount}
                     />
 
                     {/* Optional description */}
-                    <Text style={styles.label}>
-                        Descripción <Text style={styles.optional}>(opcional)</Text>
+                    <Text style={s.label}>
+                        Descripción <Text style={s.optional}>(opcional)</Text>
                     </Text>
                     <TextInput
-                        style={[styles.input, styles.textArea]}
+                        style={[s.input, s.textArea]}
                         placeholder="Notas adicionales..."
-                        placeholderTextColor="#888"
+                        placeholderTextColor={theme.textMuted}
                         value={description}
                         onChangeText={setDescription}
                         multiline
@@ -102,28 +106,28 @@ export default function CreateExpenseScreen({ navigation }: any) {
                     />
 
                     {/* Category skipped for now — coming in future sprint */}
-                    <TouchableOpacity style={styles.skipRow}>
-                        <Text style={styles.skipText}>Categoría — Sin categoría</Text>
+                    <TouchableOpacity style={s.skipRow}>
+                        <Text style={s.skipText}>Categoría — Sin categoría</Text>
                     </TouchableOpacity>
 
                     {/* Save button with confirmation */}
                     <TouchableOpacity
-                        style={styles.primaryButton}
+                        style={s.primaryButton}
                         onPress={handleSave}
                         disabled={loading}
                     >
                         {loading ? (
-                            <ActivityIndicator color="#fff" />
+                            <ActivityIndicator color={theme.primaryText} />
                         ) : (
-                            <Text style={styles.primaryButtonText}>Guardar gasto</Text>
+                            <Text style={s.primaryButtonText}>Guardar gasto</Text>
                         )}
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.secondaryButton}
+                        style={s.secondaryButton}
                         onPress={() => navigation.goBack()}
                     >
-                        <Text style={styles.secondaryButtonText}>Cancelar</Text>
+                        <Text style={s.secondaryButtonText}>Cancelar</Text>
                     </TouchableOpacity>
                 </ScrollView>
 
@@ -133,46 +137,46 @@ export default function CreateExpenseScreen({ navigation }: any) {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
+const makeStyles = (theme: Theme) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.background },
     content: { padding: 20, paddingBottom: 100 },
-    label: { fontSize: 13, color: '#888', marginBottom: 6, marginTop: 4 },
-    optional: { fontSize: 11, color: '#bbb' },
+    label: { fontSize: 13, color: theme.textMuted, marginBottom: 6, marginTop: 4 },
+    optional: { fontSize: 11, color: theme.textMuted },
     input: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.surface,
         borderWidth: 0.5,
-        borderColor: '#ddd',
+        borderColor: theme.border,
         borderRadius: 12,
         padding: 14,
         fontSize: 16,
-        color: '#1a1a2e',
+        color: theme.textPrimary,
         marginBottom: 14,
     },
     textArea: { height: 90, textAlignVertical: 'top' },
     skipRow: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.surface,
         borderWidth: 0.5,
-        borderColor: '#ddd',
+        borderColor: theme.border,
         borderRadius: 12,
         padding: 14,
         marginBottom: 20,
     },
-    skipText: { fontSize: 14, color: '#888' },
+    skipText: { fontSize: 14, color: theme.textMuted },
     primaryButton: {
-        backgroundColor: '#1a1a2e',
+        backgroundColor: theme.primary,
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
         marginBottom: 10,
     },
-    primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '500' },
+    primaryButtonText: { color: theme.primaryText, fontSize: 16, fontWeight: '500' },
     secondaryButton: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.surface,
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
         borderWidth: 0.5,
-        borderColor: '#ddd',
+        borderColor: theme.border,
     },
-    secondaryButtonText: { color: '#1a1a2e', fontSize: 16 },
+    secondaryButtonText: { color: theme.textPrimary, fontSize: 16 },
 });
