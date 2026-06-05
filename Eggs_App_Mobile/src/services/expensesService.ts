@@ -13,13 +13,17 @@ export const getCategories = async (): Promise<Category[]> => {
 
 // Create a new expense
 export const createExpense = async (
-    name: string,
     amount: number,
-    description?: string,
+    expenseDate: Date,
     categoryId?: number,
     otherText?: string
 ) => {
-    const response = await client.post('/Expenses', { name, amount, description, categoryId, otherText });
+    const response = await client.post('/Expenses', {
+        amount,
+        expenseDate: `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}-${String(expenseDate.getDate()).padStart(2, '0')}`,
+        categoryId,
+        otherText,
+    });
     return response.data;
 };
 

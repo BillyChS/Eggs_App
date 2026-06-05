@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     KeyboardAvoidingView,
     Modal,
     Platform,
@@ -15,28 +14,52 @@ import {
 } from 'react-native';
 import { createExpense, getCategories, Category } from '../../services/expensesService';
 import ScreenHeader from '../../components/ScreenHeader';
+import { useFeedback } from '../../hooks/useFeedback';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
 
-const OTHER_ID = -1; // Sentinel value for the "Otro" option
+const OTHER_ID = -1;
+
+const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const MONTH_NAMES = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
+const formatDate = (d: Date) =>
+    `${DAY_NAMES[d.getDay()]} ${d.getDate()} de ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+
+const today = () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+};
+
+const addDays = (d: Date, n: number) => {
+    const copy = new Date(d);
+    copy.setDate(copy.getDate() + n);
+    return copy;
+};
 
 export default function CreateExpenseScreen({ navigation }: any) {
     const { theme } = useTheme();
-    const [name, setName] = useState('');
+    const { showError, showConfirm, showSuccess, FeedbackUI } = useFeedback();
+    const s = makeStyles(theme);
+
     const [amount, setAmount] = useState('');
-    const [description, setDescription] = useState('');
+    const [expenseDate, setExpenseDate] = useState<Date>(today());
     const [loading, setLoading] = useState(false);
 
     const [categories, setCategories] = useState<Category[]>([]);
-    const [selectedId, setSelectedId] = useState<number | null>(null); // null = nothing chosen yet
+    const [selectedId, setSelectedId] = useState<number | null>(null);
     const [otherText, setOtherText] = useState('');
     const [pickerVisible, setPickerVisible] = useState(false);
-
-    const s = makeStyles(theme);
 
     useEffect(() => {
         getCategories().then(setCategories).catch(() => {});
     }, []);
+
+    const isToday = expenseDate.toDateString() === today().toDateString();
 
     const selectedLabel =
         selectedId === OTHER_ID
@@ -46,21 +69,18 @@ export default function CreateExpenseScreen({ navigation }: any) {
             : 'Seleccionar categoría';
 
     const handleSave = () => {
-        if (!name || !amount) {
-            Alert.alert('Error', 'Por favor completá el nombre y el monto.');
+        if (!amount || parseFloat(amount) <= 0) {
+            showError('Ingresá un monto válido.');
             return;
         }
         if (selectedId === OTHER_ID && !otherText.trim()) {
-            Alert.alert('Error', 'Especificá el tipo de gasto en el campo "Otro".');
+            showError('El campo "Otro" no puede ir vacío.');
             return;
         }
-        Alert.alert(
+        showConfirm(
             '¿Confirmar gasto?',
-            `${name}\nMonto: ₡${parseFloat(amount).toLocaleString('es-CR')}`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Sí, guardar', onPress: submitExpense },
-            ]
+            `${selectedLabel}\nMonto: ₡${parseFloat(amount).toLocaleString('es-CR')}\nFecha: ${formatDate(expenseDate)}`,
+            submitExpense
         );
     };
 
@@ -68,17 +88,19 @@ export default function CreateExpenseScreen({ navigation }: any) {
         setLoading(true);
         try {
             await createExpense(
-                name,
                 parseFloat(amount),
-                description || undefined,
+                expenseDate,
                 selectedId !== null && selectedId !== OTHER_ID ? selectedId : undefined,
                 selectedId === OTHER_ID ? otherText.trim() : undefined
             );
-            Alert.alert('¡Éxito!', 'Gasto registrado correctamente.', [
-                { text: 'OK', onPress: () => navigation.goBack() },
-            ]);
+            showSuccess('Gasto registrado correctamente.', () => {
+                setAmount('');
+                setSelectedId(null);
+                setOtherText('');
+                setExpenseDate(today());
+            });
         } catch (error) {
-            Alert.alert('Error', 'No se pudo registrar el gasto.');
+            showError('No se pudo registrar el gasto.');
         } finally {
             setLoading(false);
         }
@@ -87,37 +109,15 @@ export default function CreateExpenseScreen({ navigation }: any) {
     return (
         <KeyboardAvoidingView
             style={s.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
             <ScreenHeader title="Registrar gasto" />
 
             <View style={{ flex: 1, backgroundColor: theme.background }}>
-                <ScrollView contentContainerStyle={s.content}>
-                    {/* Expense name */}
-                    <Text style={s.label}>Nombre del gasto</Text>
-                    <TextInput
-                        style={s.input}
-                        placeholder="Ej: Alimento para gallinas"
-                        placeholderTextColor={theme.textMuted}
-                        value={name}
-                        onChangeText={setName}
-                    />
-
-                    {/* Amount in colones */}
-                    <Text style={s.label}>Monto (₡)</Text>
-                    <TextInput
-                        style={s.input}
-                        placeholder="0"
-                        placeholderTextColor={theme.textMuted}
-                        keyboardType="numeric"
-                        value={amount}
-                        onChangeText={setAmount}
-                    />
+                <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
 
                     {/* Category dropdown */}
-                    <Text style={s.label}>
-                        Categoría <Text style={s.optional}>(opcional)</Text>
-                    </Text>
+                    <Text style={s.label}>Categoría</Text>
                     <TouchableOpacity
                         style={s.dropdownButton}
                         onPress={() => setPickerVisible(true)}
@@ -129,7 +129,7 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         <Text style={s.dropdownArrow}>▾</Text>
                     </TouchableOpacity>
 
-                    {/* Free-text field shown only when "Otro" is selected */}
+                    {/* Free-text field — only when "Otro" is selected */}
                     {selectedId === OTHER_ID && (
                         <TextInput
                             style={s.input}
@@ -140,21 +140,38 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         />
                     )}
 
-                    {/* Optional description */}
-                    <Text style={s.label}>
-                        Descripción <Text style={s.optional}>(opcional)</Text>
-                    </Text>
+                    {/* Amount */}
+                    <Text style={s.label}>Monto (₡)</Text>
                     <TextInput
-                        style={[s.input, s.textArea]}
-                        placeholder="Notas adicionales..."
+                        style={s.input}
+                        placeholder="0"
                         placeholderTextColor={theme.textMuted}
-                        value={description}
-                        onChangeText={setDescription}
-                        multiline
-                        numberOfLines={3}
+                        keyboardType="numeric"
+                        value={amount}
+                        onChangeText={setAmount}
                     />
 
-                    {/* Save button with confirmation */}
+                    {/* Date picker — prev/next day arrows */}
+                    <Text style={s.label}>Fecha</Text>
+                    <View style={s.datePicker}>
+                        <TouchableOpacity
+                            style={s.dateArrow}
+                            onPress={() => setExpenseDate(d => addDays(d, -1))}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={s.dateArrowText}>‹</Text>
+                        </TouchableOpacity>
+                        <Text style={s.dateLabel}>{formatDate(expenseDate)}</Text>
+                        <TouchableOpacity
+                            style={[s.dateArrow, isToday && s.dateArrowDisabled]}
+                            onPress={() => !isToday && setExpenseDate(d => addDays(d, 1))}
+                            activeOpacity={isToday ? 1 : 0.7}
+                        >
+                            <Text style={[s.dateArrowText, isToday && s.dateArrowDisabled]}>›</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Actions */}
                     <TouchableOpacity
                         style={s.primaryButton}
                         onPress={handleSave}
@@ -185,7 +202,7 @@ export default function CreateExpenseScreen({ navigation }: any) {
             >
                 <Pressable style={s.pickerOverlay} onPress={() => setPickerVisible(false)}>
                     <View style={s.pickerCard}>
-                        <Text style={s.pickerTitle}>Seleccionar categoría</Text>
+                        <Text style={s.pickerTitle}>SELECCIONAR CATEGORÍA</Text>
 
                         {categories.map(c => (
                             <TouchableOpacity
@@ -210,6 +227,8 @@ export default function CreateExpenseScreen({ navigation }: any) {
                     </View>
                 </Pressable>
             </Modal>
+
+            {FeedbackUI}
         </KeyboardAvoidingView>
     );
 }
@@ -218,7 +237,6 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
     content: { padding: 20, paddingBottom: 32 },
     label: { fontSize: 13, color: theme.textMuted, marginBottom: 6, marginTop: 4 },
-    optional: { fontSize: 11, color: theme.textMuted },
     input: {
         backgroundColor: theme.surface,
         borderWidth: 0.5,
@@ -229,7 +247,6 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         color: theme.textPrimary,
         marginBottom: 14,
     },
-    textArea: { height: 90, textAlignVertical: 'top' },
     dropdownButton: {
         backgroundColor: theme.surface,
         borderWidth: 0.5,
@@ -244,6 +261,20 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     dropdownText: { fontSize: 16, color: theme.textPrimary, flex: 1 },
     dropdownPlaceholder: { color: theme.textMuted },
     dropdownArrow: { fontSize: 16, color: theme.textMuted, marginLeft: 8 },
+    datePicker: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.surface,
+        borderWidth: 0.5,
+        borderColor: theme.border,
+        borderRadius: 12,
+        marginBottom: 20,
+        overflow: 'hidden',
+    },
+    dateArrow:         { paddingVertical: 14, paddingHorizontal: 18 },
+    dateArrowDisabled: { color: theme.border },
+    dateArrowText:     { fontSize: 22, color: theme.primary, fontWeight: '700' },
+    dateLabel: { flex: 1, textAlign: 'center', fontSize: 15, color: theme.textPrimary, fontWeight: '500' },
     primaryButton: {
         backgroundColor: theme.primary,
         borderRadius: 12,
@@ -261,7 +292,6 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         borderColor: theme.border,
     },
     secondaryButtonText: { color: theme.textPrimary, fontSize: 16 },
-    // Picker modal
     pickerOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.4)',
@@ -276,20 +306,15 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         paddingHorizontal: 16,
     },
     pickerTitle: {
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '600',
         color: theme.textMuted,
         textAlign: 'center',
         marginBottom: 12,
-        letterSpacing: 0.5,
+        letterSpacing: 0.8,
     },
-    pickerItem: {
-        paddingVertical: 14,
-        paddingHorizontal: 12,
-        borderRadius: 10,
-        marginBottom: 4,
-    },
-    pickerItemSelected: { backgroundColor: theme.primary },
-    pickerItemText: { fontSize: 17, color: theme.textPrimary },
+    pickerItem:             { paddingVertical: 14, paddingHorizontal: 12, borderRadius: 10, marginBottom: 4 },
+    pickerItemSelected:     { backgroundColor: theme.primary },
+    pickerItemText:         { fontSize: 17, color: theme.textPrimary },
     pickerItemTextSelected: { color: theme.primaryText, fontWeight: '600' },
 });

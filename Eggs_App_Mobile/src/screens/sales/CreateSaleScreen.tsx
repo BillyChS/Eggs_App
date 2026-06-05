@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -13,11 +12,13 @@ import {
 } from 'react-native';
 import { createSale } from '../../services/salesService';
 import ScreenHeader from '../../components/ScreenHeader';
+import { useFeedback } from '../../hooks/useFeedback';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
 
 export default function CreateSaleScreen({ navigation }: any) {
     const { theme } = useTheme();
+    const { showError, showConfirm, showSuccess, FeedbackUI } = useFeedback();
     const [cartonType, setCartonType] = useState<15 | 30>(15);
     const [quantity, setQuantity] = useState('');
     const [price, setPrice] = useState('');
@@ -27,16 +28,13 @@ export default function CreateSaleScreen({ navigation }: any) {
 
     const handleSave = () => {
         if (!quantity || !price) {
-            Alert.alert('Error', 'Por favor completá todos los campos.');
+            showError('Por favor completá todos los campos.');
             return;
         }
-        Alert.alert(
+        showConfirm(
             '¿Confirmar venta?',
             `${quantity} cartón(es) de ${cartonType} u. × ₡${price}\nTotal: ₡${total.toLocaleString('es-CR')}`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Sí, guardar', onPress: submitSale },
-            ]
+            submitSale
         );
     };
 
@@ -44,11 +42,13 @@ export default function CreateSaleScreen({ navigation }: any) {
         setLoading(true);
         try {
             await createSale(cartonType, parseInt(quantity), parseFloat(price));
-            Alert.alert('¡Éxito!', 'Venta registrada correctamente.', [
-                { text: 'OK', onPress: () => navigation.goBack() },
-            ]);
+            showSuccess('Venta registrada correctamente.', () => {
+                setQuantity('');
+                setPrice('');
+                setCartonType(15);
+            });
         } catch (error) {
-            Alert.alert('Error', 'No se pudo registrar la venta.');
+            showError('No se pudo registrar la venta.');
         } finally {
             setLoading(false);
         }
@@ -57,7 +57,7 @@ export default function CreateSaleScreen({ navigation }: any) {
     return (
         <KeyboardAvoidingView
             style={s.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
             <ScreenHeader title="Registrar venta" />
 
@@ -65,6 +65,7 @@ export default function CreateSaleScreen({ navigation }: any) {
                 <ScrollView
                     style={s.container}
                     contentContainerStyle={s.content}
+                    keyboardShouldPersistTaps="handled"
                 >
                     <Text style={s.label}>Tipo de cartón</Text>
                     <View style={s.typeSelector}>
@@ -134,8 +135,9 @@ export default function CreateSaleScreen({ navigation }: any) {
                         <Text style={s.secondaryButtonText}>Cancelar</Text>
                     </TouchableOpacity>
                 </ScrollView>
-
             </View>
+
+            {FeedbackUI}
         </KeyboardAvoidingView>
     );
 }
