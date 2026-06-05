@@ -8,7 +8,6 @@ import {
     View,
 } from 'react-native';
 import { getMonthlySummary, MonthlySummary } from '../../services/reportsService';
-import HomeButton from '../../components/HomeButton';
 import ScreenHeader from '../../components/ScreenHeader';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
@@ -75,7 +74,7 @@ export default function SummaryScreen() {
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.background }}>
-            <ScreenHeader title="Resumen mensual" />
+            <ScreenHeader title="Resumen de ganancias" />
 
             <ScrollView style={s.container} contentContainerStyle={s.content}>
                 {/* Month / year picker */}
@@ -155,14 +154,13 @@ export default function SummaryScreen() {
                 )}
             </ScrollView>
 
-            <HomeButton />
         </View>
     );
 }
 
 const makeStyles = (theme: Theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
-    content: { padding: 20, paddingBottom: 100 },
+    content: { padding: 20, paddingBottom: 32 },
     picker: {
         flexDirection: 'row',
         alignItems: 'center',

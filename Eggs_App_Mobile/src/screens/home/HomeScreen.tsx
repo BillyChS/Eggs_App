@@ -1,5 +1,7 @@
-import React from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
 import {
+    ActivityIndicator,
     ScrollView,
     StyleSheet,
     Text,
@@ -7,37 +9,88 @@ import {
     View,
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
+import { getMonthlySummary, MonthlySummary } from '../../services/reportsService';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
+
+const MONTH_NAMES = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+const formatColones = (value: number): string => {
+    const rounded = Math.round(value);
+    return '₡ ' + rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
 
 export default function HomeScreen({ navigation }: any) {
     const { theme } = useTheme();
     const s = makeStyles(theme);
+
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    const [summary, setSummary] = useState<MonthlySummary | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    // Re-fetch every time the screen comes into focus so data stays fresh
+    // after registering a sale or expense. Spinner only shows on first load
+    // (when summary is still null); subsequent refreshes are silent.
+    useFocusEffect(
+        useCallback(() => {
+            let active = true;
+            getMonthlySummary(month, year)
+                .then((data) => { if (active) { setSummary(data); setLoading(false); } })
+                .catch(() => { if (active) setLoading(false); });
+            return () => { active = false; };
+        }, [month, year])
+    );
+
+    const netProfit = summary?.netProfit ?? 0;
+    const totalSales = summary?.totalSalesRevenue ?? 0;
+    const totalExpenses = summary?.totalExpenses ?? 0;
+    const hasData = summary !== null && (totalSales > 0 || totalExpenses > 0);
 
     return (
         <View style={s.container}>
             <ScreenHeader title="🥚 Eggs App" showBack={false} />
 
             <ScrollView contentContainerStyle={s.content}>
-                {/* Current month label */}
-                <Text style={s.monthLabel}>Mayo 2026</Text>
+                <Text style={s.monthLabel}>{MONTH_NAMES[month - 1]} {year}</Text>
 
                 {/* Main profit card */}
                 <View style={s.mainCard}>
                     <Text style={s.mainCardLabel}>Ganancia del mes</Text>
-                    <Text style={s.mainCardValue}>₡ 0</Text>
-                    <Text style={s.mainCardSub}>Sin registros aún</Text>
+                    {loading ? (
+                        <ActivityIndicator color={theme.primary} style={{ marginVertical: 8 }} />
+                    ) : (
+                        <>
+                            <Text style={[s.mainCardValue, { color: netProfit >= 0 ? theme.positive : theme.negative }]}>
+                                {hasData ? formatColones(netProfit) : '₡ 0'}
+                            </Text>
+                            <Text style={s.mainCardSub}>
+                                {hasData ? `${formatColones(totalSales)} en ventas` : 'Sin registros aún'}
+                            </Text>
+                        </>
+                    )}
                 </View>
 
                 {/* Sales and expenses summary cards */}
                 <View style={s.statsRow}>
                     <View style={s.statCard}>
                         <Text style={s.statLabel}>Ventas</Text>
-                        <Text style={[s.statValue, { color: theme.positive }]}>₡ 0</Text>
+                        {loading
+                            ? <ActivityIndicator color={theme.primary} />
+                            : <Text style={[s.statValue, { color: theme.positive }]}>{formatColones(totalSales)}</Text>
+                        }
                     </View>
                     <View style={s.statCard}>
                         <Text style={s.statLabel}>Gastos</Text>
-                        <Text style={[s.statValue, { color: theme.negative }]}>₡ 0</Text>
+                        {loading
+                            ? <ActivityIndicator color={theme.primary} />
+                            : <Text style={[s.statValue, { color: theme.negative }]}>{formatColones(totalExpenses)}</Text>
+                        }
                     </View>
                 </View>
 
@@ -66,7 +119,7 @@ export default function HomeScreen({ navigation }: any) {
                     activeOpacity={0.85}
                 >
                     <Text style={s.summaryIcon}>📊</Text>
-                    <Text style={s.summaryButtonText}>Ver resumen mensual</Text>
+                    <Text style={s.summaryButtonText}>Ver resumen de ganancias</Text>
                 </TouchableOpacity>
             </ScrollView>
         </View>
@@ -91,7 +144,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         borderColor: theme.border,
     },
     mainCardLabel: { fontSize: 13, color: theme.textMuted, marginBottom: 4 },
-    mainCardValue: { fontSize: 28, fontWeight: '500', color: theme.positive },
+    mainCardValue: { fontSize: 28, fontWeight: '500' },
     mainCardSub: { fontSize: 12, color: theme.textMuted, marginTop: 2 },
     statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
     statCard: {
