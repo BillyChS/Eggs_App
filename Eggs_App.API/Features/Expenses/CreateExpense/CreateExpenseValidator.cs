@@ -19,5 +19,11 @@ public class CreateExpenseValidator : AbstractValidator<CreateExpenseCommand>
         RuleFor(x => x.Description)
             .MaximumLength(300).WithMessage("La descripción no puede superar 300 caracteres.")
             .When(x => x.Description != null);
+
+        // OtherText is required when no predefined category is selected
+        RuleFor(x => x.OtherText)
+            .NotEmpty().WithMessage("Especificá el tipo de gasto.")
+            .MaximumLength(200).WithMessage("El texto no puede superar 200 caracteres.")
+            .When(x => x.CategoryId == null && x.OtherText != null);
     }
 }

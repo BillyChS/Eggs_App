@@ -7,5 +7,6 @@ public record CreateExpenseCommand(
     string Name,
     decimal Amount,
     string? Description,
-    int? CategoryId
+    int? CategoryId,
+    string? OtherText
 ) : IRequest<int>;

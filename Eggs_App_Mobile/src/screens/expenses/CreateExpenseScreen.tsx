@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
     KeyboardAvoidingView,
+    Modal,
     Platform,
+    Pressable,
     ScrollView,
     StyleSheet,
     Text,
@@ -11,11 +13,12 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { createExpense } from '../../services/expensesService';
-import HomeButton from '../../components/HomeButton';
+import { createExpense, getCategories, Category } from '../../services/expensesService';
 import ScreenHeader from '../../components/ScreenHeader';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
+
+const OTHER_ID = -1; // Sentinel value for the "Otro" option
 
 export default function CreateExpenseScreen({ navigation }: any) {
     const { theme } = useTheme();
@@ -23,12 +26,32 @@ export default function CreateExpenseScreen({ navigation }: any) {
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedId, setSelectedId] = useState<number | null>(null); // null = nothing chosen yet
+    const [otherText, setOtherText] = useState('');
+    const [pickerVisible, setPickerVisible] = useState(false);
+
     const s = makeStyles(theme);
 
-    // Handle save with confirmation dialog
+    useEffect(() => {
+        getCategories().then(setCategories).catch(() => {});
+    }, []);
+
+    const selectedLabel =
+        selectedId === OTHER_ID
+            ? `Otro: ${otherText || '…'}`
+            : selectedId !== null
+            ? categories.find(c => c.id === selectedId)?.name ?? 'Seleccionar categoría'
+            : 'Seleccionar categoría';
+
     const handleSave = () => {
         if (!name || !amount) {
             Alert.alert('Error', 'Por favor completá el nombre y el monto.');
+            return;
+        }
+        if (selectedId === OTHER_ID && !otherText.trim()) {
+            Alert.alert('Error', 'Especificá el tipo de gasto en el campo "Otro".');
             return;
         }
         Alert.alert(
@@ -41,7 +64,6 @@ export default function CreateExpenseScreen({ navigation }: any) {
         );
     };
 
-    // Submit expense to the API
     const submitExpense = async () => {
         setLoading(true);
         try {
@@ -49,7 +71,8 @@ export default function CreateExpenseScreen({ navigation }: any) {
                 name,
                 parseFloat(amount),
                 description || undefined,
-                undefined // Category is optional — skipped for now
+                selectedId !== null && selectedId !== OTHER_ID ? selectedId : undefined,
+                selectedId === OTHER_ID ? otherText.trim() : undefined
             );
             Alert.alert('¡Éxito!', 'Gasto registrado correctamente.', [
                 { text: 'OK', onPress: () => navigation.goBack() },
@@ -91,6 +114,32 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         onChangeText={setAmount}
                     />
 
+                    {/* Category dropdown */}
+                    <Text style={s.label}>
+                        Categoría <Text style={s.optional}>(opcional)</Text>
+                    </Text>
+                    <TouchableOpacity
+                        style={s.dropdownButton}
+                        onPress={() => setPickerVisible(true)}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[s.dropdownText, selectedId === null && s.dropdownPlaceholder]}>
+                            {selectedLabel}
+                        </Text>
+                        <Text style={s.dropdownArrow}>▾</Text>
+                    </TouchableOpacity>
+
+                    {/* Free-text field shown only when "Otro" is selected */}
+                    {selectedId === OTHER_ID && (
+                        <TextInput
+                            style={s.input}
+                            placeholder="Especificá el tipo de gasto..."
+                            placeholderTextColor={theme.textMuted}
+                            value={otherText}
+                            onChangeText={setOtherText}
+                        />
+                    )}
+
                     {/* Optional description */}
                     <Text style={s.label}>
                         Descripción <Text style={s.optional}>(opcional)</Text>
@@ -104,11 +153,6 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         multiline
                         numberOfLines={3}
                     />
-
-                    {/* Category skipped for now — coming in future sprint */}
-                    <TouchableOpacity style={s.skipRow}>
-                        <Text style={s.skipText}>Categoría — Sin categoría</Text>
-                    </TouchableOpacity>
 
                     {/* Save button with confirmation */}
                     <TouchableOpacity
@@ -130,16 +174,49 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         <Text style={s.secondaryButtonText}>Cancelar</Text>
                     </TouchableOpacity>
                 </ScrollView>
-
-                <HomeButton />
             </View>
+
+            {/* Category picker modal */}
+            <Modal
+                visible={pickerVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setPickerVisible(false)}
+            >
+                <Pressable style={s.pickerOverlay} onPress={() => setPickerVisible(false)}>
+                    <View style={s.pickerCard}>
+                        <Text style={s.pickerTitle}>Seleccionar categoría</Text>
+
+                        {categories.map(c => (
+                            <TouchableOpacity
+                                key={c.id}
+                                style={[s.pickerItem, selectedId === c.id && s.pickerItemSelected]}
+                                onPress={() => { setSelectedId(c.id); setPickerVisible(false); }}
+                            >
+                                <Text style={[s.pickerItemText, selectedId === c.id && s.pickerItemTextSelected]}>
+                                    {c.name}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+
+                        <TouchableOpacity
+                            style={[s.pickerItem, selectedId === OTHER_ID && s.pickerItemSelected]}
+                            onPress={() => { setSelectedId(OTHER_ID); setPickerVisible(false); }}
+                        >
+                            <Text style={[s.pickerItemText, selectedId === OTHER_ID && s.pickerItemTextSelected]}>
+                                Otro
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </Pressable>
+            </Modal>
         </KeyboardAvoidingView>
     );
 }
 
 const makeStyles = (theme: Theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
-    content: { padding: 20, paddingBottom: 100 },
+    content: { padding: 20, paddingBottom: 32 },
     label: { fontSize: 13, color: theme.textMuted, marginBottom: 6, marginTop: 4 },
     optional: { fontSize: 11, color: theme.textMuted },
     input: {
@@ -153,15 +230,20 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         marginBottom: 14,
     },
     textArea: { height: 90, textAlignVertical: 'top' },
-    skipRow: {
+    dropdownButton: {
         backgroundColor: theme.surface,
         borderWidth: 0.5,
         borderColor: theme.border,
         borderRadius: 12,
         padding: 14,
-        marginBottom: 20,
+        marginBottom: 14,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
-    skipText: { fontSize: 14, color: theme.textMuted },
+    dropdownText: { fontSize: 16, color: theme.textPrimary, flex: 1 },
+    dropdownPlaceholder: { color: theme.textMuted },
+    dropdownArrow: { fontSize: 16, color: theme.textMuted, marginLeft: 8 },
     primaryButton: {
         backgroundColor: theme.primary,
         borderRadius: 12,
@@ -179,4 +261,35 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         borderColor: theme.border,
     },
     secondaryButtonText: { color: theme.textPrimary, fontSize: 16 },
+    // Picker modal
+    pickerOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        justifyContent: 'flex-end',
+    },
+    pickerCard: {
+        backgroundColor: theme.surface,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        paddingTop: 16,
+        paddingBottom: 32,
+        paddingHorizontal: 16,
+    },
+    pickerTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: theme.textMuted,
+        textAlign: 'center',
+        marginBottom: 12,
+        letterSpacing: 0.5,
+    },
+    pickerItem: {
+        paddingVertical: 14,
+        paddingHorizontal: 12,
+        borderRadius: 10,
+        marginBottom: 4,
+    },
+    pickerItemSelected: { backgroundColor: theme.primary },
+    pickerItemText: { fontSize: 17, color: theme.textPrimary },
+    pickerItemTextSelected: { color: theme.primaryText, fontWeight: '600' },
 });

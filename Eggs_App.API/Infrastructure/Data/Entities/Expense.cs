@@ -12,6 +12,7 @@ public class Expense
     public int UserId { get; set; }
     public User User { get; set; } = null!;
 
-    public int? CategoryId { get; set; }        // Opcional (skip)
+    public int? CategoryId { get; set; }
     public Category? Category { get; set; }
+    public string? OtherText { get; set; }      // Filled when no predefined category applies
 }

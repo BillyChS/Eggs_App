@@ -31,6 +31,7 @@ public class CreateExpenseHandler : IRequestHandler<CreateExpenseCommand, int>
             Amount = request.Amount,
             Description = request.Description,
             CategoryId = request.CategoryId,
+            OtherText  = request.OtherText,
             // Use local time instead of UTC to avoid timezone issues
             ExpenseDate = DateTime.Now,
             UserId = userId
