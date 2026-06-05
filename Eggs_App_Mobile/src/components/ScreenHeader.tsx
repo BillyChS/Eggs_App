@@ -57,7 +57,7 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
                     <View style={[s.menuCard, { top: insets.top + 56 }]}>
                         {/* Dark mode toggle */}
                         <View style={s.menuItem}>
-                            <Text style={s.menuItemText}>Modo oscuro</Text>
+                            <Text style={s.menuItemText}>{isDark ? '🌙' : '☀️'} {isDark ? 'Modo oscuro' : 'Modo claro'}</Text>
                             <Switch
                                 value={isDark}
                                 onValueChange={(v) => setMode(v ? 'dark' : 'light')}
@@ -65,9 +65,20 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
                                 thumbColor={theme.surface}
                             />
                         </View>
+                        {showBack && (
+                            <>
+                                <View style={s.menuDivider} />
+                                <TouchableOpacity
+                                    style={s.menuItem}
+                                    onPress={() => { setMenuOpen(false); navigation.navigate('Home'); }}
+                                >
+                                    <Text style={s.menuItemText}>🏠 Inicio</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
                         <View style={s.menuDivider} />
                         <TouchableOpacity style={s.menuItem} onPress={handleLogout}>
-                            <Text style={s.menuItemText}>Cerrar sesión</Text>
+                            <Text style={s.menuItemText}>🚪 Cerrar sesión</Text>
                         </TouchableOpacity>
                     </View>
                 </Pressable>
@@ -135,7 +146,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         borderColor: theme.border,
         paddingVertical: 10,
         paddingHorizontal: 16,
-        borderRadius: 22,
+        borderRadius: 12,
         alignSelf: 'flex-start',
     },
     backText: { color: theme.textPrimary, fontSize: 18, fontWeight: '700' },

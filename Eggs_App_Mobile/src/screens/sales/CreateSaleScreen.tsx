@@ -12,7 +12,6 @@ import {
     View,
 } from 'react-native';
 import { createSale } from '../../services/salesService';
-import HomeButton from '../../components/HomeButton';
 import ScreenHeader from '../../components/ScreenHeader';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
@@ -136,7 +135,6 @@ export default function CreateSaleScreen({ navigation }: any) {
                     </TouchableOpacity>
                 </ScrollView>
 
-                <HomeButton />
             </View>
         </KeyboardAvoidingView>
     );
@@ -144,7 +142,7 @@ export default function CreateSaleScreen({ navigation }: any) {
 
 const makeStyles = (theme: Theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
-    content: { padding: 20, paddingBottom: 100 },
+    content: { padding: 20, paddingBottom: 32 },
     label: { fontSize: 13, color: theme.textMuted, marginBottom: 6, marginTop: 4 },
     typeSelector: { flexDirection: 'row', gap: 10, marginBottom: 16 },
     typeOpt: {
