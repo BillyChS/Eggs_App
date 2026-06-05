@@ -8,6 +8,7 @@ export const lightTheme = {
     primaryText: '#FFFFFF',
     positive: '#16A34A',    // ganancia
     negative: '#DC2626',    // pérdida
+    warning:  '#D97706',    // advertencia
 };
 
 export const darkTheme = {
@@ -20,6 +21,7 @@ export const darkTheme = {
     primaryText: '#FFFFFF',
     positive: '#4ADE80',
     negative: '#F87171',
+    warning:  '#FBBF24',
 };
 
 export type Theme = typeof lightTheme;
