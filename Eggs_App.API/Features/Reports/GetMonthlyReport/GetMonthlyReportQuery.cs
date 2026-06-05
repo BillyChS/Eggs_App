@@ -25,10 +25,8 @@ public record SaleSummaryDto(
 
 // Summary of each expense for the report
 public record ExpenseSummaryDto(
-    string Name,
     decimal Amount,
-    string? Description,
-    string? CategoryName,
+    string? CategoryName,   // Category.Name, OtherText, or null
     DateTime ExpenseDate
 );
 

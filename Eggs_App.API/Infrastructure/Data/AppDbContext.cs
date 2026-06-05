@@ -55,9 +55,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Expense>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
-            entity.Property(e => e.Description).HasMaxLength(300);
             entity.Property(e => e.OtherText).HasMaxLength(200);
             entity.HasOne(e => e.User)
                   .WithMany(u => u.Expenses)

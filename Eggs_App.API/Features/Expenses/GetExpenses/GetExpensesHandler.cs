@@ -34,10 +34,8 @@ public class GetExpensesHandler : IRequestHandler<GetExpensesQuery, List<Expense
             .OrderByDescending(e => e.ExpenseDate)
             .Select(e => new ExpenseDto(
                 e.Id,
-                e.Name,
                 e.Amount,
-                e.Description,
-                e.Category != null ? e.Category.Name : null,
+                e.Category != null ? e.Category.Name : e.OtherText,
                 e.ExpenseDate))
             .ToListAsync(cancellationToken);
     }

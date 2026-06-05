@@ -39,7 +39,9 @@ public static class GetMonthlySummary
                 .Where(e => e.UserId == request.UserId
                             && e.ExpenseDate.Month == request.Month
                             && e.ExpenseDate.Year == request.Year)
-                .GroupBy(e => e.Category != null ? e.Category.Name : "Sin categoría")
+                .GroupBy(e => e.Category != null ? e.Category.Name
+                            : e.OtherText != null ? e.OtherText
+                            : "Sin categoría")
                 .Select(g => new CategoryTotal(g.Key, g.Sum(e => e.Amount)))
                 .ToListAsync(ct);
 

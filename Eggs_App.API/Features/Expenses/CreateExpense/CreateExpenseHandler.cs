@@ -27,14 +27,11 @@ public class CreateExpenseHandler : IRequestHandler<CreateExpenseCommand, int>
         // Build the expense entity — ExpenseDate is set automatically
         var expense = new Expense
         {
-            Name = request.Name,
-            Amount = request.Amount,
-            Description = request.Description,
-            CategoryId = request.CategoryId,
-            OtherText  = request.OtherText,
-            // Use local time instead of UTC to avoid timezone issues
-            ExpenseDate = DateTime.Now,
-            UserId = userId
+            Amount      = request.Amount,
+            ExpenseDate = request.ExpenseDate,
+            CategoryId  = request.CategoryId,
+            OtherText   = request.OtherText,
+            UserId      = userId
         };
 
         _context.Expenses.Add(expense);

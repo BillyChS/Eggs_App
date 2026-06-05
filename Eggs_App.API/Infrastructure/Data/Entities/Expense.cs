@@ -3,9 +3,7 @@
 public class Expense
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
     public decimal Amount { get; set; }
-    public string? Description { get; set; }    // Opcional
     public DateTime ExpenseDate { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

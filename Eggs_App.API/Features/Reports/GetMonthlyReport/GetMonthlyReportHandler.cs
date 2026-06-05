@@ -46,10 +46,8 @@ public class GetMonthlyReportHandler : IRequestHandler<GetMonthlyReportQuery, Mo
                      && e.ExpenseDate.Year == request.Year)
             .OrderByDescending(e => e.ExpenseDate)
             .Select(e => new ExpenseSummaryDto(
-                e.Name,
                 e.Amount,
-                e.Description,
-                e.Category != null ? e.Category.Name : null,
+                e.Category != null ? e.Category.Name : e.OtherText,
                 e.ExpenseDate))
             .ToListAsync(cancellationToken);
 
