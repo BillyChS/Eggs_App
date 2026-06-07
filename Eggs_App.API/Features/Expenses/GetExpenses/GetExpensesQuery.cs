@@ -7,7 +7,9 @@ public record ExpenseDto(
     int Id,
     decimal Amount,
     string? CategoryName,   // Category.Name, OtherText, or null
-    DateTime ExpenseDate
+    DateTime ExpenseDate,
+    int? CategoryId,
+    string? OtherText
 );
 
 // Query to get all expenses for a given month and year

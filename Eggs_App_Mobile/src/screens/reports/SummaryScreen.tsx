@@ -8,6 +8,7 @@ import {
     View,
 } from 'react-native';
 import { getMonthlySummary, MonthlySummary } from '../../services/reportsService';
+import MonthPickerModal from '../../components/MonthPickerModal';
 import ScreenHeader from '../../components/ScreenHeader';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
@@ -34,6 +35,7 @@ export default function SummaryScreen() {
     const [summary, setSummary] = useState<MonthlySummary | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [calendarVisible, setCalendarVisible] = useState(false);
     const s = makeStyles(theme);
 
     // Fetch the summary whenever the selected period changes
@@ -82,9 +84,10 @@ export default function SummaryScreen() {
                     <TouchableOpacity style={s.arrow} onPress={goToPreviousMonth}>
                         <Text style={s.arrowText}>‹</Text>
                     </TouchableOpacity>
-                    <Text style={s.period}>
-                        {MONTH_NAMES[month - 1]} {year}
-                    </Text>
+                    <TouchableOpacity style={s.periodBtn} onPress={() => setCalendarVisible(true)}>
+                        <Text style={s.period}>{MONTH_NAMES[month - 1]} {year}</Text>
+                        <Text style={s.calIcon}>📅</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity style={s.arrow} onPress={goToNextMonth}>
                         <Text style={s.arrowText}>›</Text>
                     </TouchableOpacity>
@@ -111,6 +114,19 @@ export default function SummaryScreen() {
 
                 {!loading && !error && summary && !isEmpty && (
                     <>
+                        {/* Net profit — highlighted */}
+                        <View
+                            style={[
+                                s.profitCard,
+                                { backgroundColor: profitPositive ? theme.positive : theme.negative },
+                            ]}
+                        >
+                            <Text style={s.profitLabel}>Ganancia neta</Text>
+                            <Text style={s.profitValue}>
+                                {formatColones(summary.netProfit)}
+                            </Text>
+                        </View>
+
                         {/* Sales revenue */}
                         <View style={s.card}>
                             <Text style={s.cardLabel}>Ventas del mes</Text>
@@ -137,23 +153,17 @@ export default function SummaryScreen() {
                                 </Text>
                             </View>
                         </View>
-
-                        {/* Net profit — highlighted */}
-                        <View
-                            style={[
-                                s.profitCard,
-                                { backgroundColor: profitPositive ? theme.positive : theme.negative },
-                            ]}
-                        >
-                            <Text style={s.profitLabel}>Ganancia neta</Text>
-                            <Text style={s.profitValue}>
-                                {formatColones(summary.netProfit)}
-                            </Text>
-                        </View>
                     </>
                 )}
             </ScrollView>
 
+            <MonthPickerModal
+                visible={calendarVisible}
+                month={month}
+                year={year}
+                onSelect={(m, y) => { setMonth(m); setYear(y); setCalendarVisible(false); }}
+                onClose={() => setCalendarVisible(false)}
+            />
         </View>
     );
 }
@@ -178,7 +188,9 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         borderColor: theme.border,
     },
     arrowText: { fontSize: 30, color: theme.textPrimary, lineHeight: 34 },
+    periodBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     period: { fontSize: 20, fontWeight: '600', color: theme.textPrimary },
+    calIcon: { fontSize: 16 },
     centered: { alignItems: 'center', marginTop: 40 },
     muted: { fontSize: 18, color: theme.textMuted, marginTop: 12, textAlign: 'center' },
     error: { fontSize: 18, color: theme.negative, textAlign: 'center' },
@@ -207,7 +219,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     },
     expenseTotalLabel: { fontSize: 18, fontWeight: '700', color: theme.textPrimary },
     expenseTotalValue: { fontSize: 18, fontWeight: '700', color: theme.textPrimary },
-    profitCard: { borderRadius: 14, padding: 24, alignItems: 'center', marginTop: 4 },
+    profitCard: { borderRadius: 14, padding: 24, alignItems: 'center', marginBottom: 16 },
     profitLabel: { fontSize: 18, color: '#fff', marginBottom: 6 },
     profitValue: { fontSize: 36, fontWeight: '800', color: '#fff' },
 });

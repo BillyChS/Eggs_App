@@ -116,7 +116,6 @@ export default function CreateExpenseScreen({ navigation }: any) {
             <View style={{ flex: 1, backgroundColor: theme.background }}>
                 <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
 
-                    {/* Category dropdown */}
                     <Text style={s.label}>Categoría</Text>
                     <TouchableOpacity
                         style={s.dropdownButton}
@@ -129,7 +128,6 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         <Text style={s.dropdownArrow}>▾</Text>
                     </TouchableOpacity>
 
-                    {/* Free-text field — only when "Otro" is selected */}
                     {selectedId === OTHER_ID && (
                         <TextInput
                             style={s.input}
@@ -140,7 +138,6 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         />
                     )}
 
-                    {/* Amount */}
                     <Text style={s.label}>Monto (₡)</Text>
                     <TextInput
                         style={s.input}
@@ -151,7 +148,6 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         onChangeText={setAmount}
                     />
 
-                    {/* Date picker — prev/next day arrows */}
                     <Text style={s.label}>Fecha</Text>
                     <View style={s.datePicker}>
                         <TouchableOpacity
@@ -163,15 +159,14 @@ export default function CreateExpenseScreen({ navigation }: any) {
                         </TouchableOpacity>
                         <Text style={s.dateLabel}>{formatDate(expenseDate)}</Text>
                         <TouchableOpacity
-                            style={[s.dateArrow, isToday && s.dateArrowDisabled]}
+                            style={s.dateArrow}
                             onPress={() => !isToday && setExpenseDate(d => addDays(d, 1))}
                             activeOpacity={isToday ? 1 : 0.7}
                         >
-                            <Text style={[s.dateArrowText, isToday && s.dateArrowDisabled]}>›</Text>
+                            <Text style={[s.dateArrowText, isToday && s.dateArrowTextDisabled]}>›</Text>
                         </TouchableOpacity>
                     </View>
 
-                    {/* Actions */}
                     <TouchableOpacity
                         style={s.primaryButton}
                         onPress={handleSave}
@@ -193,7 +188,6 @@ export default function CreateExpenseScreen({ navigation }: any) {
                 </ScrollView>
             </View>
 
-            {/* Category picker modal */}
             <Modal
                 visible={pickerVisible}
                 transparent
@@ -271,9 +265,9 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         marginBottom: 20,
         overflow: 'hidden',
     },
-    dateArrow:         { paddingVertical: 14, paddingHorizontal: 18 },
-    dateArrowDisabled: { color: theme.border },
-    dateArrowText:     { fontSize: 22, color: theme.primary, fontWeight: '700' },
+    dateArrow:             { paddingVertical: 14, paddingHorizontal: 18 },
+    dateArrowText:         { fontSize: 22, color: theme.primary, fontWeight: '700' },
+    dateArrowTextDisabled: { color: theme.border },
     dateLabel: { flex: 1, textAlign: 'center', fontSize: 15, color: theme.textPrimary, fontWeight: '500' },
     primaryButton: {
         backgroundColor: theme.primary,

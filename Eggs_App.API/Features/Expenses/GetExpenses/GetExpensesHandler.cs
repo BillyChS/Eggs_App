@@ -36,7 +36,9 @@ public class GetExpensesHandler : IRequestHandler<GetExpensesQuery, List<Expense
                 e.Id,
                 e.Amount,
                 e.Category != null ? e.Category.Name : e.OtherText,
-                e.ExpenseDate))
+                e.ExpenseDate,
+                e.CategoryId,
+                e.OtherText))
             .ToListAsync(cancellationToken);
     }
 }

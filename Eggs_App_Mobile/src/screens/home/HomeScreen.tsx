@@ -112,6 +112,14 @@ export default function HomeScreen({ navigation }: any) {
                     <Text style={s.secondaryButtonText}>− Registrar gasto</Text>
                 </TouchableOpacity>
 
+                {/* Navigate to history screen */}
+                <TouchableOpacity
+                    style={s.secondaryButton}
+                    onPress={() => navigation.navigate('History')}
+                >
+                    <Text style={s.secondaryButtonText}>📋 Ver historial</Text>
+                </TouchableOpacity>
+
                 {/* Navigate to summary screen */}
                 <TouchableOpacity
                     style={s.summaryButton}

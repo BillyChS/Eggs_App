@@ -1,5 +1,7 @@
 ﻿using Eggs_App.API.Features.Expenses.CreateExpense;
+using Eggs_App.API.Features.Expenses.DeleteExpense;
 using Eggs_App.API.Features.Expenses.GetExpenses;
+using Eggs_App.API.Features.Expenses.UpdateExpense;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,5 +34,19 @@ public class ExpensesController : ControllerBase
     {
         var expenses = await _mediator.Send(new GetExpensesQuery(month, year));
         return Ok(expenses);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateExpense(int id, [FromBody] UpdateExpenseBody body)
+    {
+        var found = await _mediator.Send(new UpdateExpenseCommand(id, body.Amount, body.ExpenseDate, body.CategoryId, body.OtherText));
+        return found ? NoContent() : NotFound();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteExpense(int id)
+    {
+        var found = await _mediator.Send(new DeleteExpenseCommand(id));
+        return found ? NoContent() : NotFound();
     }
 }

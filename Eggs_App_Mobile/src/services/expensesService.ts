@@ -5,13 +5,23 @@ export interface Category {
     name: string;
 }
 
-// Get predefined expense categories
+export interface ExpenseItem {
+    id: number;
+    amount: number;
+    categoryName: string | null;
+    expenseDate: string;
+    categoryId: number | null;
+    otherText: string | null;
+}
+
+const formatDate = (d: Date): string =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 export const getCategories = async (): Promise<Category[]> => {
     const response = await client.get('/Categories');
     return response.data;
 };
 
-// Create a new expense
 export const createExpense = async (
     amount: number,
     expenseDate: Date,
@@ -20,15 +30,33 @@ export const createExpense = async (
 ) => {
     const response = await client.post('/Expenses', {
         amount,
-        expenseDate: `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}-${String(expenseDate.getDate()).padStart(2, '0')}`,
+        expenseDate: formatDate(expenseDate),
         categoryId,
         otherText,
     });
     return response.data;
 };
 
-// Get all expenses for a given month and year
-export const getExpenses = async (month: number, year: number) => {
+export const getExpenses = async (month: number, year: number): Promise<ExpenseItem[]> => {
     const response = await client.get(`/Expenses?month=${month}&year=${year}`);
     return response.data;
+};
+
+export const updateExpense = async (
+    id: number,
+    amount: number,
+    expenseDate: Date,
+    categoryId?: number,
+    otherText?: string
+): Promise<void> => {
+    await client.put(`/Expenses/${id}`, {
+        amount,
+        expenseDate: formatDate(expenseDate),
+        categoryId,
+        otherText,
+    });
+};
+
+export const deleteExpense = async (id: number): Promise<void> => {
+    await client.delete(`/Expenses/${id}`);
 };
