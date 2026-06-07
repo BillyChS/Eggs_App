@@ -1,4 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
@@ -34,9 +35,6 @@ export default function HomeScreen({ navigation }: any) {
     const [summary, setSummary] = useState<MonthlySummary | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Re-fetch every time the screen comes into focus so data stays fresh
-    // after registering a sale or expense. Spinner only shows on first load
-    // (when summary is still null); subsequent refreshes are silent.
     useFocusEffect(
         useCallback(() => {
             let active = true;
@@ -59,7 +57,6 @@ export default function HomeScreen({ navigation }: any) {
             <ScrollView contentContainerStyle={s.content}>
                 <Text style={s.monthLabel}>{MONTH_NAMES[month - 1]} {year}</Text>
 
-                {/* Main profit card */}
                 <View style={s.mainCard}>
                     <Text style={s.mainCardLabel}>Ganancia del mes</Text>
                     {loading ? (
@@ -76,7 +73,6 @@ export default function HomeScreen({ navigation }: any) {
                     )}
                 </View>
 
-                {/* Sales and expenses summary cards */}
                 <View style={s.statsRow}>
                     <View style={s.statCard}>
                         <Text style={s.statLabel}>Ventas</Text>
@@ -96,37 +92,36 @@ export default function HomeScreen({ navigation }: any) {
 
                 <Text style={s.sectionTitle}>ACCIONES RÁPIDAS</Text>
 
-                {/* Navigate to create sale screen */}
                 <TouchableOpacity
                     style={s.primaryButton}
                     onPress={() => navigation.navigate('CreateSale')}
                 >
-                    <Text style={s.primaryButtonText}>+ Registrar venta</Text>
+                    <Ionicons name="add-circle-outline" size={22} color={theme.primaryText} />
+                    <Text style={s.primaryButtonText}>Registrar venta</Text>
                 </TouchableOpacity>
 
-                {/* Navigate to create expense screen */}
                 <TouchableOpacity
                     style={s.secondaryButton}
                     onPress={() => navigation.navigate('CreateExpense')}
                 >
-                    <Text style={s.secondaryButtonText}>− Registrar gasto</Text>
+                    <Ionicons name="cash-outline" size={22} color={theme.textPrimary} />
+                    <Text style={s.secondaryButtonText}>Registrar gasto</Text>
                 </TouchableOpacity>
 
-                {/* Navigate to history screen */}
                 <TouchableOpacity
                     style={s.secondaryButton}
                     onPress={() => navigation.navigate('History')}
                 >
-                    <Text style={s.secondaryButtonText}>📋 Ver historial</Text>
+                    <Ionicons name="time-outline" size={22} color={theme.textPrimary} />
+                    <Text style={s.secondaryButtonText}>Ver historial</Text>
                 </TouchableOpacity>
 
-                {/* Navigate to summary screen */}
                 <TouchableOpacity
                     style={s.summaryButton}
                     onPress={() => navigation.navigate('Summary')}
                     activeOpacity={0.85}
                 >
-                    <Text style={s.summaryIcon}>📊</Text>
+                    <Ionicons name="bar-chart-outline" size={28} color="#fff" />
                     <Text style={s.summaryButtonText}>Ver resumen de ganancias</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -137,12 +132,7 @@ export default function HomeScreen({ navigation }: any) {
 const makeStyles = (theme: Theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
     content: { padding: 16 },
-    monthLabel: {
-        fontSize: 14,
-        color: theme.textPrimary,
-        fontWeight: '500',
-        marginBottom: 14,
-    },
+    monthLabel: { fontSize: 14, color: theme.textPrimary, fontWeight: '500', marginBottom: 14 },
     mainCard: {
         backgroundColor: theme.surface,
         borderRadius: 12,
@@ -176,7 +166,10 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         backgroundColor: theme.primary,
         borderRadius: 12,
         padding: 16,
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
         marginBottom: 10,
     },
     primaryButtonText: { color: theme.primaryText, fontSize: 16, fontWeight: '500' },
@@ -184,7 +177,10 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         backgroundColor: theme.surface,
         borderRadius: 12,
         padding: 16,
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
         borderWidth: 0.5,
         borderColor: theme.border,
         marginBottom: 10,
@@ -194,6 +190,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: 12,
         backgroundColor: theme.positive,
         paddingVertical: 18,
         paddingHorizontal: 24,
@@ -205,6 +202,5 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         shadowRadius: 4,
         shadowOffset: { width: 0, height: 2 },
     },
-    summaryIcon: { fontSize: 24, marginRight: 12 },
     summaryButtonText: { fontSize: 20, fontWeight: '700', color: '#fff' },
 });

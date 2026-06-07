@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
     Modal,
@@ -34,7 +35,6 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
 
     return (
         <>
-            {/* Navy title bar with ☰ menu toggle — same on every screen */}
             <View style={[s.navbar, { paddingTop: insets.top + 12 }]}>
                 <Text style={s.title} numberOfLines={1}>{title}</Text>
                 <TouchableOpacity
@@ -42,11 +42,10 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
                     onPress={() => setMenuOpen(true)}
                     activeOpacity={0.7}
                 >
-                    <Text style={s.menuIcon}>☰</Text>
+                    <Ionicons name="menu-outline" size={28} color={theme.primaryText} />
                 </TouchableOpacity>
             </View>
 
-            {/* Dropdown menu (tap outside to close) */}
             <Modal
                 visible={menuOpen}
                 transparent
@@ -55,9 +54,17 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
             >
                 <Pressable style={s.overlay} onPress={() => setMenuOpen(false)}>
                     <View style={[s.menuCard, { top: insets.top + 56 }]}>
-                        {/* Dark mode toggle */}
                         <View style={s.menuItem}>
-                            <Text style={s.menuItemText}>{isDark ? '🌙' : '☀️'} {isDark ? 'Modo oscuro' : 'Modo claro'}</Text>
+                            <View style={s.menuItemContent}>
+                                <Ionicons
+                                    name={isDark ? 'moon-outline' : 'sunny-outline'}
+                                    size={20}
+                                    color={theme.textPrimary}
+                                />
+                                <Text style={s.menuItemText}>
+                                    {isDark ? 'Modo oscuro' : 'Modo claro'}
+                                </Text>
+                            </View>
                             <Switch
                                 value={isDark}
                                 onValueChange={(v) => setMode(v ? 'dark' : 'light')}
@@ -72,19 +79,24 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
                                     style={s.menuItem}
                                     onPress={() => { setMenuOpen(false); navigation.navigate('Home'); }}
                                 >
-                                    <Text style={s.menuItemText}>🏠 Inicio</Text>
+                                    <View style={s.menuItemContent}>
+                                        <Ionicons name="home-outline" size={20} color={theme.textPrimary} />
+                                        <Text style={s.menuItemText}>Inicio</Text>
+                                    </View>
                                 </TouchableOpacity>
                             </>
                         )}
                         <View style={s.menuDivider} />
                         <TouchableOpacity style={s.menuItem} onPress={handleLogout}>
-                            <Text style={s.menuItemText}>🚪 Cerrar sesión</Text>
+                            <View style={s.menuItemContent}>
+                                <Ionicons name="log-out-outline" size={20} color={theme.textPrimary} />
+                                <Text style={s.menuItemText}>Cerrar sesión</Text>
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </Pressable>
             </Modal>
 
-            {/* "Volver" button below the navbar (hidden on Home) */}
             {showBack && (
                 <View style={s.backRow}>
                     <TouchableOpacity
@@ -92,7 +104,8 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
                         onPress={() => navigation.goBack()}
                         activeOpacity={0.7}
                     >
-                        <Text style={s.backText}>‹ Volver</Text>
+                        <Ionicons name="arrow-back" size={20} color={theme.textPrimary} />
+                        <Text style={s.backText}>Volver</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -111,7 +124,6 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     },
     title: { color: theme.primaryText, fontSize: 20, fontWeight: '600', flex: 1 },
     menuButton: { paddingHorizontal: 8, paddingVertical: 4 },
-    menuIcon: { color: theme.primaryText, fontSize: 28 },
     overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)' },
     menuCard: {
         position: 'absolute',
@@ -133,6 +145,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         paddingVertical: 14,
         paddingHorizontal: 18,
     },
+    menuItemContent: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     menuItemText: { fontSize: 18, fontWeight: '600', color: theme.textPrimary },
     menuDivider: { height: 1, backgroundColor: theme.border, marginHorizontal: 12 },
     backRow: {
@@ -148,6 +161,9 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         paddingHorizontal: 16,
         borderRadius: 12,
         alignSelf: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
     },
     backText: { color: theme.textPrimary, fontSize: 18, fontWeight: '700' },
 });

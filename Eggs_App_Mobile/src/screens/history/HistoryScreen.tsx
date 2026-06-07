@@ -1,4 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -216,10 +217,10 @@ export default function HistoryScreen() {
             </Text>
             <View style={s.rowActions}>
                 <TouchableOpacity style={s.iconBtn} onPress={() => openEditSale(item)} hitSlop={HIT}>
-                    <Text style={s.iconText}>✏️</Text>
+                    <Ionicons name="pencil-outline" size={20} color={theme.textPrimary} />
                 </TouchableOpacity>
                 <TouchableOpacity style={s.iconBtn} onPress={() => handleDeleteSale(item.id)} hitSlop={HIT}>
-                    <Text style={s.iconText}>🗑️</Text>
+                    <Ionicons name="trash-outline" size={20} color={theme.negative} />
                 </TouchableOpacity>
             </View>
         </View>
@@ -236,10 +237,10 @@ export default function HistoryScreen() {
             </Text>
             <View style={s.rowActions}>
                 <TouchableOpacity style={s.iconBtn} onPress={() => openEditExpense(item)} hitSlop={HIT}>
-                    <Text style={s.iconText}>✏️</Text>
+                    <Ionicons name="pencil-outline" size={20} color={theme.textPrimary} />
                 </TouchableOpacity>
                 <TouchableOpacity style={s.iconBtn} onPress={() => handleDeleteExpense(item.id)} hitSlop={HIT}>
-                    <Text style={s.iconText}>🗑️</Text>
+                    <Ionicons name="trash-outline" size={20} color={theme.negative} />
                 </TouchableOpacity>
             </View>
         </View>
@@ -252,14 +253,14 @@ export default function HistoryScreen() {
             <ScrollView contentContainerStyle={s.content}>
                 <View style={s.picker}>
                     <TouchableOpacity style={s.arrow} onPress={goToPrev}>
-                        <Text style={s.arrowText}>‹</Text>
+                        <Ionicons name="chevron-back" size={28} color={theme.textPrimary} />
                     </TouchableOpacity>
                     <TouchableOpacity style={s.periodBtn} onPress={() => setCalendarVisible(true)}>
                         <Text style={s.period}>{MONTH_NAMES[month - 1]} {year}</Text>
-                        <Text style={s.calIcon}>📅</Text>
+                        <Ionicons name="calendar-outline" size={18} color={theme.textPrimary} />
                     </TouchableOpacity>
                     <TouchableOpacity style={s.arrow} onPress={goToNext}>
-                        <Text style={s.arrowText}>›</Text>
+                        <Ionicons name="chevron-forward" size={28} color={theme.textPrimary} />
                     </TouchableOpacity>
                 </View>
 
@@ -612,10 +613,8 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         alignItems: 'center', justifyContent: 'center',
         borderWidth: 1, borderColor: theme.border,
     },
-    arrowText: { fontSize: 28, color: theme.textPrimary, lineHeight: 32 },
     periodBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     period: { fontSize: 18, fontWeight: '600', color: theme.textPrimary },
-    calIcon: { fontSize: 16 },
 
     tabRow: {
         flexDirection: 'row',
@@ -645,8 +644,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     rowTitle: { fontSize: 17, color: theme.textPrimary, fontWeight: '600' },
     rowAmount: { fontSize: 17, fontWeight: '700', marginRight: 4 },
     rowActions: { flexDirection: 'row', alignItems: 'center' },
-    iconBtn: { padding: 4 },
-    iconText: { fontSize: 16 },
+    iconBtn: { padding: 6 },
 
     viewOverlay: {
         flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -82,14 +83,14 @@ export default function SummaryScreen() {
                 {/* Month / year picker */}
                 <View style={s.picker}>
                     <TouchableOpacity style={s.arrow} onPress={goToPreviousMonth}>
-                        <Text style={s.arrowText}>‹</Text>
+                        <Ionicons name="chevron-back" size={30} color={theme.textPrimary} />
                     </TouchableOpacity>
                     <TouchableOpacity style={s.periodBtn} onPress={() => setCalendarVisible(true)}>
                         <Text style={s.period}>{MONTH_NAMES[month - 1]} {year}</Text>
-                        <Text style={s.calIcon}>📅</Text>
+                        <Ionicons name="calendar-outline" size={20} color={theme.textPrimary} />
                     </TouchableOpacity>
                     <TouchableOpacity style={s.arrow} onPress={goToNextMonth}>
-                        <Text style={s.arrowText}>›</Text>
+                        <Ionicons name="chevron-forward" size={30} color={theme.textPrimary} />
                     </TouchableOpacity>
                 </View>
 
@@ -187,10 +188,8 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         borderWidth: 1,
         borderColor: theme.border,
     },
-    arrowText: { fontSize: 30, color: theme.textPrimary, lineHeight: 34 },
     periodBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     period: { fontSize: 20, fontWeight: '600', color: theme.textPrimary },
-    calIcon: { fontSize: 16 },
     centered: { alignItems: 'center', marginTop: 40 },
     muted: { fontSize: 18, color: theme.textMuted, marginTop: 12, textAlign: 'center' },
     error: { fontSize: 18, color: theme.negative, textAlign: 'center' },

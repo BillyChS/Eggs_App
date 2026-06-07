@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
@@ -27,13 +28,23 @@ export default function MonthPickerModal({ visible, month, year, onSelect, onClo
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <Pressable style={s.overlay} onPress={onClose}>
                 <Pressable style={s.card} onPress={() => {}}>
+                    <View style={s.closeRow}>
+                        <TouchableOpacity
+                            style={s.closeBtn}
+                            onPress={onClose}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                            <Ionicons name="close" size={28} color={theme.textMuted} />
+                        </TouchableOpacity>
+                    </View>
+
                     <View style={s.header}>
                         <TouchableOpacity
                             onPress={() => setPickerYear(y => y - 1)}
                             style={s.yearArrow}
                             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                         >
-                            <Text style={s.yearArrowText}>‹</Text>
+                            <Ionicons name="chevron-back" size={30} color={theme.primary} />
                         </TouchableOpacity>
                         <Text style={s.yearLabel}>{pickerYear}</Text>
                         <TouchableOpacity
@@ -41,14 +52,7 @@ export default function MonthPickerModal({ visible, month, year, onSelect, onClo
                             style={s.yearArrow}
                             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                         >
-                            <Text style={s.yearArrowText}>›</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={onClose}
-                            style={s.closeBtn}
-                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        >
-                            <Text style={s.closeText}>✕</Text>
+                            <Ionicons name="chevron-forward" size={30} color={theme.primary} />
                         </TouchableOpacity>
                     </View>
 
@@ -95,16 +99,11 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         elevation: 8,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    yearArrow: { padding: 8 },
-    yearArrowText: { fontSize: 30, color: theme.primary, fontWeight: '700' },
-    yearLabel: { flex: 1, textAlign: 'center', fontSize: 22, fontWeight: '700', color: theme.textPrimary },
+    closeRow: { alignItems: 'flex-end', marginBottom: 4 },
     closeBtn: { padding: 10 },
-    closeText: { fontSize: 28, color: theme.textMuted, fontWeight: '600' },
+    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+    yearArrow: { padding: 8 },
+    yearLabel: { flex: 1, textAlign: 'center', fontSize: 22, fontWeight: '700', color: theme.textPrimary },
     row: { flexDirection: 'row', marginBottom: 12 },
     monthBtn: {
         flex: 1,
