@@ -207,17 +207,14 @@ export default function HistoryScreen() {
 
     const renderSaleRow = (item: SaleItem) => (
         <View key={item.id} style={s.row}>
-            <View style={s.rowMain}>
+            <TouchableOpacity style={s.rowMain} onPress={() => setViewSale(item)} activeOpacity={0.7}>
                 <Text style={s.rowDate}>{formatDate(item.saleDate)}</Text>
                 <Text style={s.rowTitle}>Cartón {item.cartonType} u. × {item.quantity}</Text>
-            </View>
+            </TouchableOpacity>
             <Text style={[s.rowAmount, { color: theme.positive }]}>
                 {formatColones(item.totalAmount)}
             </Text>
             <View style={s.rowActions}>
-                <TouchableOpacity style={s.iconBtn} onPress={() => setViewSale(item)} hitSlop={HIT}>
-                    <Text style={s.iconText}>🔍</Text>
-                </TouchableOpacity>
                 <TouchableOpacity style={s.iconBtn} onPress={() => openEditSale(item)} hitSlop={HIT}>
                     <Text style={s.iconText}>✏️</Text>
                 </TouchableOpacity>
@@ -230,17 +227,14 @@ export default function HistoryScreen() {
 
     const renderExpenseRow = (item: ExpenseItem) => (
         <View key={item.id} style={s.row}>
-            <View style={s.rowMain}>
+            <TouchableOpacity style={s.rowMain} onPress={() => setViewExpense(item)} activeOpacity={0.7}>
                 <Text style={s.rowDate}>{formatDate(item.expenseDate)}</Text>
                 <Text style={s.rowTitle}>{item.categoryName ?? 'Sin categoría'}</Text>
-            </View>
+            </TouchableOpacity>
             <Text style={[s.rowAmount, { color: theme.negative }]}>
                 {formatColones(item.amount)}
             </Text>
             <View style={s.rowActions}>
-                <TouchableOpacity style={s.iconBtn} onPress={() => setViewExpense(item)} hitSlop={HIT}>
-                    <Text style={s.iconText}>🔍</Text>
-                </TouchableOpacity>
                 <TouchableOpacity style={s.iconBtn} onPress={() => openEditExpense(item)} hitSlop={HIT}>
                     <Text style={s.iconText}>✏️</Text>
                 </TouchableOpacity>
@@ -312,7 +306,7 @@ export default function HistoryScreen() {
                     <Pressable style={s.viewCard} onPress={() => {}}>
                         <View style={s.modalHeader}>
                             <Text style={s.modalTitle}>Detalle de venta</Text>
-                            <TouchableOpacity onPress={() => setViewSale(null)} hitSlop={HIT}>
+                            <TouchableOpacity style={s.closeBtn} onPress={() => setViewSale(null)} hitSlop={HIT}>
                                 <Text style={s.modalClose}>✕</Text>
                             </TouchableOpacity>
                         </View>
@@ -357,7 +351,7 @@ export default function HistoryScreen() {
                     <Pressable style={s.viewCard} onPress={() => {}}>
                         <View style={s.modalHeader}>
                             <Text style={s.modalTitle}>Detalle de gasto</Text>
-                            <TouchableOpacity onPress={() => setViewExpense(null)} hitSlop={HIT}>
+                            <TouchableOpacity style={s.closeBtn} onPress={() => setViewExpense(null)} hitSlop={HIT}>
                                 <Text style={s.modalClose}>✕</Text>
                             </TouchableOpacity>
                         </View>
@@ -395,6 +389,7 @@ export default function HistoryScreen() {
                         <View style={s.modalHeader}>
                             <Text style={s.modalTitle}>Editar venta</Text>
                             <TouchableOpacity
+                                style={s.closeBtn}
                                 onPress={() => !editLoading && setEditSale(null)}
                                 hitSlop={HIT}
                             >
@@ -480,6 +475,7 @@ export default function HistoryScreen() {
                         <View style={s.modalHeader}>
                             <Text style={s.modalTitle}>Editar gasto</Text>
                             <TouchableOpacity
+                                style={s.closeBtn}
                                 onPress={() => !editLoading && setEditExpense(null)}
                                 hitSlop={HIT}
                             >
@@ -645,9 +641,9 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         borderWidth: 0.5, borderColor: theme.border,
     },
     rowMain: { flex: 1, marginRight: 6 },
-    rowDate: { fontSize: 13, color: theme.textMuted, marginBottom: 2 },
-    rowTitle: { fontSize: 15, color: theme.textPrimary, fontWeight: '500' },
-    rowAmount: { fontSize: 15, fontWeight: '700', marginRight: 4 },
+    rowDate: { fontSize: 14, color: theme.textMuted, marginBottom: 2 },
+    rowTitle: { fontSize: 17, color: theme.textPrimary, fontWeight: '600' },
+    rowAmount: { fontSize: 17, fontWeight: '700', marginRight: 4 },
     rowActions: { flexDirection: 'row', alignItems: 'center' },
     iconBtn: { padding: 4 },
     iconText: { fontSize: 16 },
@@ -666,18 +662,19 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         flexDirection: 'row', alignItems: 'center',
         justifyContent: 'space-between', marginBottom: 16,
     },
-    modalTitle: { fontSize: 18, fontWeight: '700', color: theme.textPrimary },
-    modalClose: { fontSize: 18, color: theme.textMuted, fontWeight: '600' },
+    modalTitle: { fontSize: 20, fontWeight: '700', color: theme.textPrimary },
+    modalClose: { fontSize: 24, color: theme.textMuted, fontWeight: '600' },
+    closeBtn:   { padding: 8 },
 
     detailRow: {
         flexDirection: 'row', justifyContent: 'space-between',
-        paddingVertical: 10,
+        paddingVertical: 13,
     },
     detailDivider: {
         borderTopWidth: 1, borderTopColor: theme.border, marginTop: 4, paddingTop: 14,
     },
-    detailLabel: { fontSize: 15, color: theme.textMuted },
-    detailValue: { fontSize: 15, color: theme.textPrimary },
+    detailLabel: { fontSize: 17, color: theme.textMuted },
+    detailValue: { fontSize: 17, color: theme.textPrimary },
 
     editOverlay: {
         flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end',
