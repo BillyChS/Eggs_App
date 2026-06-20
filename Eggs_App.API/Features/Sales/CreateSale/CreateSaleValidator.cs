@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Eggs_App.API.Infrastructure.Data.Entities;
+using FluentValidation;
 
 namespace Eggs_App.API.Features.Sales.CreateSale;
 
@@ -17,5 +18,10 @@ public class CreateSaleValidator : AbstractValidator<CreateSaleCommand>
         RuleFor(x => x.PricePerCarton)
             .GreaterThan(0)
             .WithMessage("El precio debe ser mayor a 0.");
+
+        RuleFor(x => x.CustomerName)
+            .NotEmpty()
+            .WithMessage("El nombre del cliente es requerido para ventas pendientes.")
+            .When(x => x.PaymentStatus == PaymentStatus.Pending);
     }
 }

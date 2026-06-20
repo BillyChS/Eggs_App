@@ -122,19 +122,29 @@ export default function SummaryScreen() {
                                 { backgroundColor: profitPositive ? theme.positive : theme.negative },
                             ]}
                         >
-                            <Text style={s.profitLabel}>Ganancia neta</Text>
+                            <Text style={s.profitLabel}>Ganancia neta (efectivo)</Text>
                             <Text style={s.profitValue}>
                                 {formatColones(summary.netProfit)}
                             </Text>
                         </View>
 
-                        {/* Sales revenue */}
+                        {/* Sales revenue (paid only) */}
                         <View style={s.card}>
-                            <Text style={s.cardLabel}>Ventas del mes</Text>
+                            <Text style={s.cardLabel}>Ventas cobradas</Text>
                             <Text style={s.salesValue}>
                                 {formatColones(summary.totalSalesRevenue)}
                             </Text>
                         </View>
+
+                        {/* Pending receivables */}
+                        {summary.pendingReceivables > 0 && (
+                            <View style={[s.card, s.pendingCard]}>
+                                <Text style={s.cardLabel}>Por cobrar (pendiente)</Text>
+                                <Text style={[s.salesValue, { color: theme.warning }]}>
+                                    {formatColones(summary.pendingReceivables)}
+                                </Text>
+                            </View>
+                        )}
 
                         {/* Expenses by category */}
                         <View style={s.card}>
@@ -218,6 +228,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     },
     expenseTotalLabel: { fontSize: 18, fontWeight: '700', color: theme.textPrimary },
     expenseTotalValue: { fontSize: 18, fontWeight: '700', color: theme.textPrimary },
+    pendingCard: { borderWidth: 1.5, borderColor: '#D97706' },
     profitCard: { borderRadius: 14, padding: 24, alignItems: 'center', marginBottom: 16 },
     profitLabel: { fontSize: 18, color: '#fff', marginBottom: 6 },
     profitValue: { fontSize: 36, fontWeight: '800', color: '#fff' },

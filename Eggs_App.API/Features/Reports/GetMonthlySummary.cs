@@ -1,4 +1,5 @@
 ﻿using Eggs_App.API.Infrastructure.Data;
+using Eggs_App.API.Infrastructure.Data.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,8 @@ public static class GetMonthlySummary
         decimal TotalSalesRevenue,
         IReadOnlyList<CategoryTotal> ExpensesByCategory,
         decimal TotalExpenses,
-        decimal NetProfit);
+        decimal NetProfit,
+        decimal PendingReceivables);
 
     public class Handler : IRequestHandler<Query, Response>
     {
@@ -26,12 +28,18 @@ public static class GetMonthlySummary
 
         public async Task<Response> Handle(Query request, CancellationToken ct)
         {
-            // Sales already store TotalAmount per transaction, so we sum it directly.
-            // Nullable cast + ?? 0 returns zero for an empty period (no error).
+            // Cash-basis: only paid sales count as revenue.
             var salesRevenue = await _db.Sales
                 .Where(s => s.UserId == request.UserId
                             && s.SaleDate.Month == request.Month
-                            && s.SaleDate.Year == request.Year)
+                            && s.SaleDate.Year == request.Year
+                            && s.PaymentStatus == PaymentStatus.Paid)
+                .SumAsync(s => (decimal?)s.TotalAmount, ct) ?? 0m;
+
+            // All-time pending receivables (not month-filtered — they have no paid date yet).
+            var pendingReceivables = await _db.Sales
+                .Where(s => s.UserId == request.UserId
+                            && s.PaymentStatus == PaymentStatus.Pending)
                 .SumAsync(s => (decimal?)s.TotalAmount, ct) ?? 0m;
 
             // Group expenses by category name; uncategorized go to "Sin categoría".
@@ -54,7 +62,8 @@ public static class GetMonthlySummary
                 decimal.Round(salesRevenue, 2),
                 expensesByCategory,
                 decimal.Round(totalExpenses, 2),
-                decimal.Round(netProfit, 2));
+                decimal.Round(netProfit, 2),
+                decimal.Round(pendingReceivables, 2));
         }
     }
 }

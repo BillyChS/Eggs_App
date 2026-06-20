@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import MonthPickerModal from '../../components/MonthPickerModal';
 import ScreenHeader from '../../components/ScreenHeader';
+import Tag from '../../components/Tag';
 import { useFeedback } from '../../hooks/useFeedback';
 import { deleteExpense, getCategories, getExpenses, updateExpense, Category, ExpenseItem } from '../../services/expensesService';
 import { deleteSale, getSales, updateSale, SaleItem } from '../../services/salesService';
@@ -211,8 +212,9 @@ export default function HistoryScreen() {
             <TouchableOpacity style={s.rowMain} onPress={() => setViewSale(item)} activeOpacity={0.7}>
                 <Text style={s.rowDate}>{formatDate(item.saleDate)}</Text>
                 <Text style={s.rowTitle}>Cartón {item.cartonType} u. × {item.quantity}</Text>
+                <Tag variant={item.paymentStatus} />
             </TouchableOpacity>
-            <Text style={[s.rowAmount, { color: theme.positive }]}>
+            <Text style={[s.rowAmount, { color: item.paymentStatus === 'Paid' ? theme.positive : theme.warning }]}>
                 {formatColones(item.totalAmount)}
             </Text>
             <View style={s.rowActions}>
@@ -331,10 +333,29 @@ export default function HistoryScreen() {
                                 </View>
                                 <View style={[s.detailRow, s.detailDivider]}>
                                     <Text style={[s.detailLabel, { fontWeight: '700' }]}>Total</Text>
-                                    <Text style={[s.detailValue, { color: theme.positive, fontWeight: '700' }]}>
+                                    <Text style={[s.detailValue, {
+                                        color: viewSale.paymentStatus === 'Paid' ? theme.positive : theme.warning,
+                                        fontWeight: '700',
+                                    }]}>
                                         {formatColones(viewSale.totalAmount)}
                                     </Text>
                                 </View>
+                                <View style={s.detailRow}>
+                                    <Text style={s.detailLabel}>Estado</Text>
+                                    <Tag variant={viewSale.paymentStatus} />
+                                </View>
+                                {viewSale.customerName && (
+                                    <View style={s.detailRow}>
+                                        <Text style={s.detailLabel}>Cliente</Text>
+                                        <Text style={s.detailValue}>{viewSale.customerName}</Text>
+                                    </View>
+                                )}
+                                {viewSale.paidDate && (
+                                    <View style={s.detailRow}>
+                                        <Text style={s.detailLabel}>Fecha de pago</Text>
+                                        <Text style={s.detailValue}>{formatDate(viewSale.paidDate)}</Text>
+                                    </View>
+                                )}
                             </>
                         )}
                     </Pressable>

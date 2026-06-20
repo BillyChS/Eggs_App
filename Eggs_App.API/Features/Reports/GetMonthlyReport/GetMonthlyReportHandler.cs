@@ -1,4 +1,5 @@
 ﻿using Eggs_App.API.Infrastructure.Data;
+using Eggs_App.API.Infrastructure.Data.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +20,11 @@ public class GetMonthlyReportHandler : IRequestHandler<GetMonthlyReportQuery, Mo
 
     public async Task<MonthlyReportDto> Handle(GetMonthlyReportQuery request, CancellationToken cancellationToken)
     {
-        // Extract user ID from JWT claims
         var userId = int.Parse(
             _httpContextAccessor.HttpContext!.User
                 .FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        // Fetch all sales for the given month and year
+        // Cash-basis: include all sales in the list but total only paid ones.
         var sales = await _context.Sales
             .Where(s => s.UserId == userId
                      && s.SaleDate.Month == request.Month
@@ -35,10 +35,11 @@ public class GetMonthlyReportHandler : IRequestHandler<GetMonthlyReportQuery, Mo
                 s.Quantity,
                 s.PricePerCarton,
                 s.TotalAmount,
-                s.SaleDate))
+                s.SaleDate,
+                s.PaymentStatus,
+                s.CustomerName))
             .ToListAsync(cancellationToken);
 
-        // Fetch all expenses for the given month and year
         var expenses = await _context.Expenses
             .Include(e => e.Category)
             .Where(e => e.UserId == userId
@@ -51,11 +52,17 @@ public class GetMonthlyReportHandler : IRequestHandler<GetMonthlyReportQuery, Mo
                 e.ExpenseDate))
             .ToListAsync(cancellationToken);
 
-        // Calculate financial totals
-        var totalSales = sales.Sum(s => s.TotalAmount);
+        var totalSales = sales
+            .Where(s => s.PaymentStatus == PaymentStatus.Paid)
+            .Sum(s => s.TotalAmount);
         var totalExpenses = expenses.Sum(e => e.Amount);
         var netProfit = totalSales - totalExpenses;
-        var totalCartonsSold = sales.Sum(s => s.Quantity);
+        var totalCartonsSold = sales
+            .Where(s => s.PaymentStatus == PaymentStatus.Paid)
+            .Sum(s => s.Quantity);
+        var pendingReceivables = sales
+            .Where(s => s.PaymentStatus == PaymentStatus.Pending)
+            .Sum(s => s.TotalAmount);
 
         return new MonthlyReportDto(
             request.Month,
@@ -64,6 +71,7 @@ public class GetMonthlyReportHandler : IRequestHandler<GetMonthlyReportQuery, Mo
             totalExpenses,
             netProfit,
             totalCartonsSold,
+            pendingReceivables,
             sales,
             expenses
         );

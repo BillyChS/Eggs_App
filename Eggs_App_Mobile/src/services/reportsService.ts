@@ -1,12 +1,10 @@
 import client from '../api/client';
 
-// Shape of each expense category row in the summary
 export interface CategoryTotal {
     category: string;
     total: number;
 }
 
-// Full monthly summary returned by GET /reports/summary
 export interface MonthlySummary {
     month: number;
     year: number;
@@ -14,6 +12,7 @@ export interface MonthlySummary {
     expensesByCategory: CategoryTotal[];
     totalExpenses: number;
     netProfit: number;
+    pendingReceivables: number;
 }
 
 export const getMonthlySummary = async (

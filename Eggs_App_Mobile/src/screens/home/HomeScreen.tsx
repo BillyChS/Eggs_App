@@ -90,6 +90,15 @@ export default function HomeScreen({ navigation }: any) {
                     </View>
                 </View>
 
+                {!loading && (summary?.pendingReceivables ?? 0) > 0 && (
+                    <View style={[s.statCard, s.receivablesCard]}>
+                        <Text style={s.statLabel}>Por cobrar (total)</Text>
+                        <Text style={[s.statValue, { color: theme.warning }]}>
+                            {formatColones(summary!.pendingReceivables)}
+                        </Text>
+                    </View>
+                )}
+
                 <Text style={s.sectionTitle}>ACCIONES RÁPIDAS</Text>
 
                 <TouchableOpacity
@@ -114,6 +123,15 @@ export default function HomeScreen({ navigation }: any) {
                 >
                     <Ionicons name="time-outline" size={22} color={theme.textPrimary} />
                     <Text style={s.secondaryButtonText}>Ver historial</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={s.receivablesButton}
+                    onPress={() => navigation.navigate('Receivables')}
+                    activeOpacity={0.8}
+                >
+                    <Ionicons name="wallet-outline" size={22} color={theme.warning} />
+                    <Text style={s.receivablesButtonText}>Cuentas por cobrar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -144,7 +162,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     mainCardLabel: { fontSize: 13, color: theme.textMuted, marginBottom: 4 },
     mainCardValue: { fontSize: 28, fontWeight: '500' },
     mainCardSub: { fontSize: 12, color: theme.textMuted, marginTop: 2 },
-    statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+    statsRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
     statCard: {
         flex: 1,
         backgroundColor: theme.surface,
@@ -152,6 +170,10 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         padding: 14,
         borderWidth: 0.5,
         borderColor: theme.border,
+    },
+    receivablesCard: {
+        flex: 0,
+        marginBottom: 20,
     },
     statLabel: { fontSize: 12, color: theme.textMuted, marginBottom: 4 },
     statValue: { fontSize: 20, fontWeight: '500' },
@@ -186,6 +208,20 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         marginBottom: 10,
     },
     secondaryButtonText: { color: theme.textPrimary, fontSize: 16 },
+    receivablesButton: {
+        backgroundColor: theme.surface,
+        borderRadius: 12,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        borderWidth: 1.5,
+        borderColor: theme.warning,
+        marginBottom: 10,
+        minHeight: 52,
+    },
+    receivablesButtonText: { color: theme.warning, fontSize: 16, fontWeight: '600' },
     summaryButton: {
         flexDirection: 'row',
         alignItems: 'center',
