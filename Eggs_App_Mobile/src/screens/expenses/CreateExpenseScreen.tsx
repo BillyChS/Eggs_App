@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    KeyboardAvoidingView,
     Modal,
-    Platform,
     Pressable,
-    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -14,6 +11,7 @@ import {
 } from 'react-native';
 import { createExpense, getCategories, Category } from '../../services/expensesService';
 import ScreenHeader from '../../components/ScreenHeader';
+import { KeyboardAwareScreen } from '../../components/KeyboardAwareScreen';
 import { useFeedback } from '../../hooks/useFeedback';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
@@ -107,86 +105,86 @@ export default function CreateExpenseScreen({ navigation }: any) {
     };
 
     return (
-        <KeyboardAvoidingView
-            style={s.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
+        <View style={s.container}>
             <ScreenHeader title="Registrar gasto" />
 
-            <View style={{ flex: 1, backgroundColor: theme.background }}>
-                <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+            <KeyboardAwareScreen
+                contentContainerStyle={s.content}
+                footer={
+                    <>
+                        <TouchableOpacity
+                            style={s.primaryButton}
+                            onPress={handleSave}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color={theme.primaryText} />
+                            ) : (
+                                <Text style={s.primaryButtonText}>Guardar gasto</Text>
+                            )}
+                        </TouchableOpacity>
 
-                    <Text style={s.label}>Categoría</Text>
-                    <TouchableOpacity
-                        style={s.dropdownButton}
-                        onPress={() => setPickerVisible(true)}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[s.dropdownText, selectedId === null && s.dropdownPlaceholder]}>
-                            {selectedLabel}
-                        </Text>
-                        <Text style={s.dropdownArrow}>▾</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={s.secondaryButton}
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Text style={s.secondaryButtonText}>Cancelar</Text>
+                        </TouchableOpacity>
+                    </>
+                }
+            >
+                <Text style={s.label}>Categoría</Text>
+                <TouchableOpacity
+                    style={s.dropdownButton}
+                    onPress={() => setPickerVisible(true)}
+                    activeOpacity={0.7}
+                >
+                    <Text style={[s.dropdownText, selectedId === null && s.dropdownPlaceholder]}>
+                        {selectedLabel}
+                    </Text>
+                    <Text style={s.dropdownArrow}>▾</Text>
+                </TouchableOpacity>
 
-                    {selectedId === OTHER_ID && (
-                        <TextInput
-                            style={s.input}
-                            placeholder="Especificá el tipo de gasto..."
-                            placeholderTextColor={theme.textMuted}
-                            value={otherText}
-                            onChangeText={setOtherText}
-                        />
-                    )}
-
-                    <Text style={s.label}>Monto (₡)</Text>
+                {selectedId === OTHER_ID && (
                     <TextInput
                         style={s.input}
-                        placeholder="0"
+                        placeholder="Especificá el tipo de gasto..."
                         placeholderTextColor={theme.textMuted}
-                        keyboardType="numeric"
-                        value={amount}
-                        onChangeText={setAmount}
+                        value={otherText}
+                        onChangeText={setOtherText}
                     />
+                )}
 
-                    <Text style={s.label}>Fecha</Text>
-                    <View style={s.datePicker}>
-                        <TouchableOpacity
-                            style={s.dateArrow}
-                            onPress={() => setExpenseDate(d => addDays(d, -1))}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={s.dateArrowText}>‹</Text>
-                        </TouchableOpacity>
-                        <Text style={s.dateLabel}>{formatDate(expenseDate)}</Text>
-                        <TouchableOpacity
-                            style={s.dateArrow}
-                            onPress={() => !isToday && setExpenseDate(d => addDays(d, 1))}
-                            activeOpacity={isToday ? 1 : 0.7}
-                        >
-                            <Text style={[s.dateArrowText, isToday && s.dateArrowTextDisabled]}>›</Text>
-                        </TouchableOpacity>
-                    </View>
+                <Text style={s.label}>Monto (₡)</Text>
+                <TextInput
+                    style={s.input}
+                    placeholder="0"
+                    placeholderTextColor={theme.textMuted}
+                    keyboardType="numeric"
+                    value={amount}
+                    onChangeText={setAmount}
+                />
 
+                <Text style={s.label}>Fecha</Text>
+                <View style={s.datePicker}>
                     <TouchableOpacity
-                        style={s.primaryButton}
-                        onPress={handleSave}
-                        disabled={loading}
+                        style={s.dateArrow}
+                        onPress={() => setExpenseDate(d => addDays(d, -1))}
+                        activeOpacity={0.7}
                     >
-                        {loading ? (
-                            <ActivityIndicator color={theme.primaryText} />
-                        ) : (
-                            <Text style={s.primaryButtonText}>Guardar gasto</Text>
-                        )}
+                        <Text style={s.dateArrowText}>‹</Text>
                     </TouchableOpacity>
-
+                    <Text style={s.dateLabel}>{formatDate(expenseDate)}</Text>
                     <TouchableOpacity
-                        style={s.secondaryButton}
-                        onPress={() => navigation.goBack()}
+                        style={s.dateArrow}
+                        onPress={() => !isToday && setExpenseDate(d => addDays(d, 1))}
+                        activeOpacity={isToday ? 1 : 0.7}
                     >
-                        <Text style={s.secondaryButtonText}>Cancelar</Text>
+                        <Text style={[s.dateArrowText, isToday && s.dateArrowTextDisabled]}>›</Text>
                     </TouchableOpacity>
-                </ScrollView>
-            </View>
+                </View>
+
+            </KeyboardAwareScreen>
 
             <Modal
                 visible={pickerVisible}
@@ -223,13 +221,14 @@ export default function CreateExpenseScreen({ navigation }: any) {
             </Modal>
 
             {FeedbackUI}
-        </KeyboardAvoidingView>
+        </View>
     );
 }
 
 const makeStyles = (theme: Theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
-    content: { padding: 20, paddingBottom: 32 },
+    content: { padding: 20 },
+
     label: { fontSize: 13, color: theme.textMuted, marginBottom: 6, marginTop: 4 },
     input: {
         backgroundColor: theme.surface,
@@ -275,6 +274,8 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         padding: 16,
         alignItems: 'center',
         marginBottom: 10,
+        minHeight: 52,
+        justifyContent: 'center',
     },
     primaryButtonText: { color: theme.primaryText, fontSize: 16, fontWeight: '500' },
     secondaryButton: {
@@ -284,6 +285,8 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         alignItems: 'center',
         borderWidth: 0.5,
         borderColor: theme.border,
+        minHeight: 52,
+        justifyContent: 'center',
     },
     secondaryButtonText: { color: theme.textPrimary, fontSize: 16 },
     pickerOverlay: {
