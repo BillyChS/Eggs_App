@@ -12,5 +12,4 @@ public class Customer
     public DateTime CreatedDate { get; set; } = DateTime.Now;
 
     public ICollection<Sale> Sales { get; set; } = [];
-    public ICollection<Abono> Abonos { get; set; } = [];
 }

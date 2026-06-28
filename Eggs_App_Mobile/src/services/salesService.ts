@@ -64,3 +64,15 @@ export const updateSale = async (
 export const deleteSale = async (id: number): Promise<void> => {
     await client.delete(`/Sales/${id}`);
 };
+
+export interface AbonoCreatedResult {
+    id: number;
+    amount: number;
+    abonoDate: string;
+    remainingBalance: number;
+}
+
+export const createAbono = async (saleId: number, amount: number, note?: string): Promise<AbonoCreatedResult> => {
+    const { data } = await client.post(`/Sales/${saleId}/abonos`, { amount, note: note ?? null });
+    return data;
+};

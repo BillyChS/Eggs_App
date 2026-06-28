@@ -1,4 +1,5 @@
 using Eggs_App.API.Infrastructure.Data;
+using Eggs_App.API.Infrastructure.Data.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -23,20 +24,29 @@ public class GetCustomersHandler : IRequestHandler<GetCustomersQuery, List<Custo
             _httpContextAccessor.HttpContext!.User
                 .FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        // Balance is computed in-database via correlated subqueries to avoid loading collections.
+        // Balance = sum of pending credit sales - sum of abonos on those sales.
         var customers = await _context.Customers
             .Where(c => c.UserId == userId)
-            .Select(c => new CustomerDto(
-                c.Id,
-                c.Name,
-                c.Phone,
-                (c.Sales.Where(s => s.IsCredit).Sum(s => (decimal?)s.TotalAmount) ?? 0m)
-                - (c.Abonos.Sum(a => (decimal?)a.Amount) ?? 0m)))
+            .Select(c => new
+            {
+                c.Id, c.Name, c.Phone,
+                TotalPending = c.Sales
+                    .Where(s => s.IsCredit && s.PaymentStatus == PaymentStatus.Pending)
+                    .Sum(s => (decimal?)s.TotalAmount) ?? 0m,
+                TotalAbonos = c.Sales
+                    .Where(s => s.IsCredit && s.PaymentStatus == PaymentStatus.Pending)
+                    .SelectMany(s => s.Abonos)
+                    .Sum(a => (decimal?)a.Amount) ?? 0m,
+            })
             .ToListAsync(cancellationToken);
 
-        if (request.WithBalance == true)
-            return customers.Where(c => c.Balance > 0).OrderByDescending(c => c.Balance).ToList();
+        var result = customers
+            .Select(c => new CustomerDto(c.Id, c.Name, c.Phone, c.TotalPending - c.TotalAbonos))
+            .ToList();
 
-        return customers;
+        if (request.WithBalance == true)
+            return result.Where(c => c.Balance > 0).OrderByDescending(c => c.Balance).ToList();
+
+        return result;
     }
 }

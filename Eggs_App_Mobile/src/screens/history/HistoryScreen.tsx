@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Modal,
@@ -70,6 +70,7 @@ export default function HistoryScreen() {
     const [year, setYear] = useState(now.getFullYear());
     const [calendarVisible, setCalendarVisible] = useState(false);
     const [tab, setTab] = useState<Tab>('sales');
+    const [search, setSearch] = useState('');
 
     const [sales, setSales] = useState<SaleItem[]>([]);
     const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
@@ -93,12 +94,28 @@ export default function HistoryScreen() {
     const [eOtherText, setEOtherText] = useState('');
     const [eCatPickerVisible, setECatPickerVisible] = useState(false);
 
+    const displaySales = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return sales;
+        return sales.filter(s => s.customerName?.toLowerCase().includes(q));
+    }, [sales, search]);
+
+    const displayExpenses = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return expenses;
+        return expenses.filter(e =>
+            e.categoryName?.toLowerCase().includes(q) ||
+            e.otherText?.toLowerCase().includes(q)
+        );
+    }, [expenses, search]);
+
     useEffect(() => {
         getCategories().then(setCategories).catch(() => {});
     }, []);
 
     useFocusEffect(
         useCallback(() => {
+            setSearch('');
             let active = true;
             setLoading(true);
             Promise.all([getSales(month, year), getExpenses(month, year)])
@@ -269,7 +286,7 @@ export default function HistoryScreen() {
                 <View style={s.tabRow}>
                     <TouchableOpacity
                         style={[s.tabBtn, tab === 'sales' && s.tabBtnActive]}
-                        onPress={() => setTab('sales')}
+                        onPress={() => { setTab('sales'); setSearch(''); }}
                     >
                         <Text style={[s.tabText, tab === 'sales' && s.tabTextActive]}>
                             Ventas ({sales.length})
@@ -277,7 +294,7 @@ export default function HistoryScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[s.tabBtn, tab === 'expenses' && s.tabBtnActive]}
-                        onPress={() => setTab('expenses')}
+                        onPress={() => { setTab('expenses'); setSearch(''); }}
                     >
                         <Text style={[s.tabText, tab === 'expenses' && s.tabTextActive]}>
                             Gastos ({expenses.length})
@@ -285,16 +302,35 @@ export default function HistoryScreen() {
                     </TouchableOpacity>
                 </View>
 
+                {/* Search bar */}
+                <View style={s.searchBox}>
+                    <Ionicons name="search-outline" size={18} color={theme.textMuted} style={s.searchIcon} />
+                    <TextInput
+                        style={s.searchInput}
+                        placeholder={tab === 'sales' ? 'Buscar por cliente...' : 'Buscar por categoría...'}
+                        placeholderTextColor={theme.textMuted}
+                        value={search}
+                        onChangeText={setSearch}
+                        returnKeyType="search"
+                        autoCorrect={false}
+                    />
+                    {search.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearch('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                            <Ionicons name="close-circle" size={18} color={theme.textMuted} />
+                        </TouchableOpacity>
+                    )}
+                </View>
+
                 {loading ? (
                     <ActivityIndicator color={theme.primary} style={s.spinner} />
                 ) : tab === 'sales' ? (
-                    sales.length === 0
-                        ? <Text style={s.empty}>No hay ventas este mes.</Text>
-                        : sales.map(renderSaleRow)
+                    displaySales.length === 0
+                        ? <Text style={s.empty}>{search ? `Sin resultados para "${search}"` : 'No hay ventas este mes.'}</Text>
+                        : displaySales.map(renderSaleRow)
                 ) : (
-                    expenses.length === 0
-                        ? <Text style={s.empty}>No hay gastos este mes.</Text>
-                        : expenses.map(renderExpenseRow)
+                    displayExpenses.length === 0
+                        ? <Text style={s.empty}>{search ? `Sin resultados para "${search}"` : 'No hay gastos este mes.'}</Text>
+                        : displayExpenses.map(renderExpenseRow)
                 )}
             </ScrollView>
 
@@ -650,6 +686,25 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     tabBtnActive: { backgroundColor: theme.primary },
     tabText: { fontSize: 15, fontWeight: '500', color: theme.textMuted },
     tabTextActive: { color: theme.primaryText },
+
+    searchBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.surface,
+        borderRadius: 12,
+        borderWidth: 0.5,
+        borderColor: theme.border,
+        paddingHorizontal: 12,
+        marginBottom: 14,
+        height: 46,
+    },
+    searchIcon: { marginRight: 8 },
+    searchInput: {
+        flex: 1,
+        fontSize: 15,
+        color: theme.textPrimary,
+        height: 46,
+    },
 
     spinner: { marginTop: 40 },
     empty: { textAlign: 'center', color: theme.textMuted, fontSize: 16, marginTop: 40 },

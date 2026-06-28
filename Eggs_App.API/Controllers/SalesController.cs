@@ -1,4 +1,5 @@
-﻿using Eggs_App.API.Features.Sales.CreateSale;
+﻿using Eggs_App.API.Features.Sales.CreateAbono;
+using Eggs_App.API.Features.Sales.CreateSale;
 using Eggs_App.API.Features.Sales.DeleteSale;
 using Eggs_App.API.Features.Sales.GetPendingSales;
 using Eggs_App.API.Features.Sales.GetSales;
@@ -62,5 +63,13 @@ public class SalesController : ControllerBase
     {
         var found = await _mediator.Send(new DeleteSaleCommand(id));
         return found ? NoContent() : NotFound();
+    }
+
+    // POST /api/Sales/{id}/abonos — register a partial payment on a credit sale
+    [HttpPost("{id}/abonos")]
+    public async Task<IActionResult> CreateAbono(int id, [FromBody] CreateAbonoBody body)
+    {
+        var result = await _mediator.Send(new CreateAbonoCommand(id, body.Amount, body.Note));
+        return result is null ? NotFound() : Ok(result);
     }
 }

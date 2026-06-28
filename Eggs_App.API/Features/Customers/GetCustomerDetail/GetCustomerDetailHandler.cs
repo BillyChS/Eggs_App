@@ -1,4 +1,5 @@
 using Eggs_App.API.Infrastructure.Data;
+using Eggs_App.API.Infrastructure.Data.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -29,20 +30,42 @@ public class GetCustomerDetailHandler : IRequestHandler<GetCustomerDetailQuery, 
 
         if (customer is null) return null;
 
-        // Fetch credit sales and abonos as ledger entries separately so each maps cleanly.
-        var creditSales = await _context.Sales
-            .Where(s => s.CustomerId == request.CustomerId && s.IsCredit)
-            .Select(s => new LedgerEntryDto(s.SaleDate, "credit_sale", s.TotalAmount, null))
+        var pendingSales = await _context.Sales
+            .Where(s => s.CustomerId == request.CustomerId
+                     && s.UserId == userId
+                     && s.IsCredit
+                     && s.PaymentStatus == PaymentStatus.Pending)
+            .Include(s => s.Abonos)
+            .OrderBy(s => s.SaleDate)
             .ToListAsync(cancellationToken);
 
-        var abonos = await _context.Abonos
-            .Where(a => a.CustomerId == request.CustomerId)
-            .Select(a => new LedgerEntryDto(a.AbonoDate, "abono", a.Amount, a.Note))
-            .ToListAsync(cancellationToken);
+        var saleDetails = pendingSales.Select(s =>
+        {
+            var abonosTotal = s.Abonos.Sum(a => a.Amount);
+            return new PendingSaleDetailDto(
+                s.Id,
+                s.SaleDate,
+                s.CartonType,
+                s.Quantity,
+                s.TotalAmount,
+                abonosTotal,
+                s.TotalAmount - abonosTotal,
+                s.Abonos
+                    .OrderBy(a => a.AbonoDate)
+                    .Select(a => new AbonoDto(a.Id, a.Amount, a.AbonoDate, a.Note))
+                    .ToList()
+            );
+        }).ToList();
 
-        var balance = creditSales.Sum(e => e.Amount) - abonos.Sum(e => e.Amount);
-        var ledger  = creditSales.Concat(abonos).OrderBy(e => e.Date).ToList();
+        var totalBalance = saleDetails.Sum(s => s.RemainingBalance);
 
-        return new CustomerDetailDto(customer.Id, customer.Name, customer.Phone, customer.Note, balance, ledger);
+        return new CustomerDetailDto(
+            customer.Id,
+            customer.Name,
+            customer.Phone,
+            customer.Note,
+            totalBalance,
+            saleDetails
+        );
     }
 }

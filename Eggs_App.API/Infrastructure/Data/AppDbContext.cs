@@ -91,13 +91,9 @@ public class AppDbContext : DbContext
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Amount).HasColumnType("decimal(18,2)");
             entity.Property(a => a.Note).HasMaxLength(300);
-            entity.HasOne(a => a.User)
-                  .WithMany(u => u.Abonos)
-                  .HasForeignKey(a => a.UserId)
-                  .OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(a => a.Customer)
-                  .WithMany(c => c.Abonos)
-                  .HasForeignKey(a => a.CustomerId)
+            entity.HasOne(a => a.Sale)
+                  .WithMany(s => s.Abonos)
+                  .HasForeignKey(a => a.SaleId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

@@ -20,4 +20,6 @@ public class Sale
     public int? CustomerId { get; set; }
     public Customer? Customer { get; set; }
     public bool IsCredit { get; set; } = false;
+
+    public ICollection<Abono> Abonos { get; set; } = [];
 }
