@@ -34,7 +34,10 @@ public class GetSalesHandler : IRequestHandler<GetSalesQuery, List<SaleDto>>
                 s.Quantity,
                 s.PricePerCarton,
                 s.TotalAmount,
-                s.SaleDate))
+                s.SaleDate,
+                s.PaymentStatus,
+                s.CustomerName,
+                s.PaidDate))
             .ToListAsync(cancellationToken);
     }
 }

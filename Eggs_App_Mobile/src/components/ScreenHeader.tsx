@@ -1,26 +1,32 @@
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
     Modal,
     Pressable,
     StyleSheet,
+    Switch,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../theme/ThemeContext';
+import { Theme } from '../theme/colors';
 
 interface Props {
     title: string;
-    showBack?: boolean;   // false on Home (no need to go back)
+    showBack?: boolean;
 }
 
 export default function ScreenHeader({ title, showBack = true }: Props) {
     const navigation = useNavigation<any>();
     const insets = useSafeAreaInsets();
     const { logout } = useAuth();
+    const { theme, isDark, setMode } = useTheme();
     const [menuOpen, setMenuOpen] = useState(false);
+    const s = makeStyles(theme);
 
     const handleLogout = () => {
         setMenuOpen(false);
@@ -29,43 +35,77 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
 
     return (
         <>
-            {/* Navy title bar with ☰ menu toggle — same on every screen */}
-            <View style={[styles.navbar, { paddingTop: insets.top + 12 }]}>
-                <Text style={styles.title} numberOfLines={1}>{title}</Text>
+            <View style={[s.navbar, { paddingTop: insets.top + 12 }]}>
+                <Text style={s.title} numberOfLines={1}>{title}</Text>
                 <TouchableOpacity
-                    style={styles.menuButton}
+                    style={s.menuButton}
                     onPress={() => setMenuOpen(true)}
                     activeOpacity={0.7}
                 >
-                    <Text style={styles.menuIcon}>☰</Text>
+                    <Ionicons name="menu-outline" size={28} color={theme.primaryText} />
                 </TouchableOpacity>
             </View>
 
-            {/* Dropdown menu (tap outside to close) */}
             <Modal
                 visible={menuOpen}
                 transparent
                 animationType="fade"
                 onRequestClose={() => setMenuOpen(false)}
             >
-                <Pressable style={styles.overlay} onPress={() => setMenuOpen(false)}>
-                    <View style={[styles.menuCard, { top: insets.top + 56 }]}>
-                        <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-                            <Text style={styles.menuItemText}>Cerrar sesión</Text>
+                <Pressable style={s.overlay} onPress={() => setMenuOpen(false)}>
+                    <View style={[s.menuCard, { top: insets.top + 56 }]}>
+                        <View style={s.menuItem}>
+                            <View style={s.menuItemContent}>
+                                <Ionicons
+                                    name={isDark ? 'moon-outline' : 'sunny-outline'}
+                                    size={20}
+                                    color={theme.textPrimary}
+                                />
+                                <Text style={s.menuItemText}>
+                                    {isDark ? 'Modo oscuro' : 'Modo claro'}
+                                </Text>
+                            </View>
+                            <Switch
+                                value={isDark}
+                                onValueChange={(v) => setMode(v ? 'dark' : 'light')}
+                                trackColor={{ false: theme.border, true: theme.primary }}
+                                thumbColor={theme.surface}
+                            />
+                        </View>
+                        {showBack && (
+                            <>
+                                <View style={s.menuDivider} />
+                                <TouchableOpacity
+                                    style={s.menuItem}
+                                    onPress={() => { setMenuOpen(false); navigation.navigate('Home'); }}
+                                >
+                                    <View style={s.menuItemContent}>
+                                        <Ionicons name="home-outline" size={20} color={theme.textPrimary} />
+                                        <Text style={s.menuItemText}>Inicio</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </>
+                        )}
+                        <View style={s.menuDivider} />
+                        <TouchableOpacity style={s.menuItem} onPress={handleLogout}>
+                            <View style={s.menuItemContent}>
+                                <Ionicons name="log-out-outline" size={20} color={theme.textPrimary} />
+                                <Text style={s.menuItemText}>Cerrar sesión</Text>
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </Pressable>
             </Modal>
 
-            {/* Light-blue "Volver" button below the navy bar (hidden on Home) */}
             {showBack && (
-                <View style={styles.backRow}>
+                <View style={s.backRow}>
                     <TouchableOpacity
-                        style={styles.backButton}
+                        style={s.backButton}
                         onPress={() => navigation.goBack()}
                         activeOpacity={0.7}
                     >
-                        <Text style={styles.backText}>‹ Volver</Text>
+                        <Ionicons name="arrow-back" size={20} color={theme.textPrimary} />
+                        <Text style={s.backText}>Volver</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -73,45 +113,57 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
     navbar: {
-        backgroundColor: '#1a1a2e',
+        backgroundColor: theme.primary,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingBottom: 14,
         paddingHorizontal: 16,
     },
-    title: { color: '#fff', fontSize: 20, fontWeight: '600', flex: 1 },
+    title: { color: theme.primaryText, fontSize: 20, fontWeight: '600', flex: 1 },
     menuButton: { paddingHorizontal: 8, paddingVertical: 4 },
-    menuIcon: { color: '#fff', fontSize: 28 },
     overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)' },
     menuCard: {
         position: 'absolute',
         right: 16,
-        backgroundColor: '#fff',
+        backgroundColor: theme.surface,
         borderRadius: 12,
         paddingVertical: 6,
-        minWidth: 190,
+        minWidth: 220,
         elevation: 6,
         shadowColor: '#000',
         shadowOpacity: 0.2,
         shadowRadius: 6,
         shadowOffset: { width: 0, height: 3 },
     },
-    menuItem: { paddingVertical: 14, paddingHorizontal: 18 },
-    menuItemText: { fontSize: 18, fontWeight: '600', color: '#1a1a2e' },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 14,
+        paddingHorizontal: 18,
+    },
+    menuItemContent: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    menuItemText: { fontSize: 18, fontWeight: '600', color: theme.textPrimary },
+    menuDivider: { height: 1, backgroundColor: theme.border, marginHorizontal: 12 },
     backRow: {
-        backgroundColor: '#f5f5f5',
+        backgroundColor: theme.background,
         paddingHorizontal: 16,
         paddingTop: 12,
     },
     backButton: {
-        backgroundColor: '#AED6F1',   // light blue
+        backgroundColor: theme.surface,
+        borderWidth: 1,
+        borderColor: theme.border,
         paddingVertical: 10,
         paddingHorizontal: 16,
-        borderRadius: 22,
+        borderRadius: 12,
         alignSelf: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
     },
-    backText: { color: '#1a1a2e', fontSize: 18, fontWeight: '700' },
+    backText: { color: theme.textPrimary, fontSize: 18, fontWeight: '700' },
 });

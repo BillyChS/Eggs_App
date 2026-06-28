@@ -42,12 +42,21 @@ public class AppDbContext : DbContext
             entity.Property(c => c.Name).IsRequired().HasMaxLength(50);
         });
 
+        modelBuilder.Entity<Category>().HasData(
+            new Category { Id = 1, Name = "Alimento",              CreatedAt = new DateTime(2026, 1, 1) },
+            new Category { Id = 2, Name = "Vitaminas",             CreatedAt = new DateTime(2026, 1, 1) },
+            new Category { Id = 3, Name = "Desparasitantes",       CreatedAt = new DateTime(2026, 1, 1) },
+            new Category { Id = 4, Name = "Burucha",               CreatedAt = new DateTime(2026, 1, 1) },
+            new Category { Id = 5, Name = "Cartones",              CreatedAt = new DateTime(2026, 1, 1) },
+            new Category { Id = 6, Name = "Plásticos/Envoltorios", CreatedAt = new DateTime(2026, 1, 1) },
+            new Category { Id = 7, Name = "Equipo",                CreatedAt = new DateTime(2026, 1, 1) }
+        );
+
         modelBuilder.Entity<Expense>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
-            entity.Property(e => e.Description).HasMaxLength(300);
+            entity.Property(e => e.OtherText).HasMaxLength(200);
             entity.HasOne(e => e.User)
                   .WithMany(u => u.Expenses)
                   .HasForeignKey(e => e.UserId)

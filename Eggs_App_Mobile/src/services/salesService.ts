@@ -1,21 +1,66 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import client from '../api/client';
 
-const API_URL = 'http://192.168.100.125:5243/api';
+export type PaymentStatus = 'Paid' | 'Pending';
 
-const getAuthHeader = async () => {
-    const token = await AsyncStorage.getItem('token');
-    return { Authorization: `Bearer ${token}` };
-};
+export interface SaleItem {
+    id: number;
+    cartonType: number;
+    quantity: number;
+    pricePerCarton: number;
+    totalAmount: number;
+    saleDate: string;
+    paymentStatus: PaymentStatus;
+    customerName: string | null;
+    paidDate: string | null;
+}
 
-export const createSale = async (cartonType: number, quantity: number, pricePerCarton: number) => {
-    const headers = await getAuthHeader();
-    const response = await axios.post(`${API_URL}/Sales`, { cartonType, quantity, pricePerCarton }, { headers });
+export interface PendingSaleItem {
+    id: number;
+    customerName: string;
+    totalAmount: number;
+    saleDate: string;
+}
+
+export const createSale = async (
+    cartonType: number,
+    quantity: number,
+    pricePerCarton: number,
+    paymentStatus: PaymentStatus = 'Paid',
+    customerName?: string
+) => {
+    const response = await client.post('/Sales', {
+        cartonType,
+        quantity,
+        pricePerCarton,
+        paymentStatus,
+        customerName: customerName ?? null,
+    });
     return response.data;
 };
 
-export const getSales = async (month: number, year: number) => {
-    const headers = await getAuthHeader();
-    const response = await axios.get(`${API_URL}/Sales?month=${month}&year=${year}`, { headers });
+export const getSales = async (month: number, year: number): Promise<SaleItem[]> => {
+    const response = await client.get(`/Sales?month=${month}&year=${year}`);
     return response.data;
+};
+
+export const getPendingSales = async (): Promise<PendingSaleItem[]> => {
+    const response = await client.get('/Sales/pending');
+    return response.data;
+};
+
+export const markSaleAsPaid = async (id: number): Promise<void> => {
+    await client.post(`/Sales/${id}/pay`);
+};
+
+export const updateSale = async (
+    id: number,
+    cartonType: number,
+    quantity: number,
+    pricePerCarton: number
+): Promise<void> => {
+    await client.put(`/Sales/${id}`, { cartonType, quantity, pricePerCarton });
+};
+
+export const deleteSale = async (id: number): Promise<void> => {
+    await client.delete(`/Sales/${id}`);
 };

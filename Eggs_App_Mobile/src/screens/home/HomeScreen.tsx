@@ -1,5 +1,8 @@
-import React from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useCallback, useState } from 'react';
 import {
+    ActivityIndicator,
     ScrollView,
     StyleSheet,
     Text,
@@ -7,128 +10,224 @@ import {
     View,
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
+import { getMonthlySummary, MonthlySummary } from '../../services/reportsService';
+import { useTheme } from '../../theme/ThemeContext';
+import { Theme } from '../../theme/colors';
+
+const MONTH_NAMES = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+const formatColones = (value: number): string => {
+    const rounded = Math.round(value);
+    return '₡ ' + rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
 
 export default function HomeScreen({ navigation }: any) {
+    const { theme } = useTheme();
+    const s = makeStyles(theme);
+
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    const [summary, setSummary] = useState<MonthlySummary | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useFocusEffect(
+        useCallback(() => {
+            let active = true;
+            getMonthlySummary(month, year)
+                .then((data) => { if (active) { setSummary(data); setLoading(false); } })
+                .catch(() => { if (active) setLoading(false); });
+            return () => { active = false; };
+        }, [month, year])
+    );
+
+    const netProfit = summary?.netProfit ?? 0;
+    const totalSales = summary?.totalSalesRevenue ?? 0;
+    const totalExpenses = summary?.totalExpenses ?? 0;
+    const hasData = summary !== null && (totalSales > 0 || totalExpenses > 0);
+
     return (
-        <View style={styles.container}>
+        <View style={s.container}>
             <ScreenHeader title="🥚 Eggs App" showBack={false} />
 
-            <ScrollView contentContainerStyle={styles.content}>
-                {/* Current month label */}
-                <Text style={styles.monthLabel}>Mayo 2026</Text>
+            <ScrollView contentContainerStyle={s.content}>
+                <Text style={s.monthLabel}>{MONTH_NAMES[month - 1]} {year}</Text>
 
-                {/* Main profit card */}
-                <View style={styles.mainCard}>
-                    <Text style={styles.mainCardLabel}>Ganancia del mes</Text>
-                    <Text style={styles.mainCardValue}>₡ 0</Text>
-                    <Text style={styles.mainCardSub}>Sin registros aún</Text>
+                <View style={s.mainCard}>
+                    <Text style={s.mainCardLabel}>Ganancia del mes</Text>
+                    {loading ? (
+                        <ActivityIndicator color={theme.primary} style={{ marginVertical: 8 }} />
+                    ) : (
+                        <>
+                            <Text style={[s.mainCardValue, { color: netProfit >= 0 ? theme.positive : theme.negative }]}>
+                                {hasData ? formatColones(netProfit) : '₡ 0'}
+                            </Text>
+                            <Text style={s.mainCardSub}>
+                                {hasData ? `${formatColones(totalSales)} en ventas` : 'Sin registros aún'}
+                            </Text>
+                        </>
+                    )}
                 </View>
 
-                {/* Sales and expenses summary cards */}
-                <View style={styles.statsRow}>
-                    <View style={styles.statCard}>
-                        <Text style={styles.statLabel}>Ventas</Text>
-                        <Text style={[styles.statValue, { color: '#0F6E56' }]}>₡ 0</Text>
+                <View style={s.statsRow}>
+                    <View style={s.statCard}>
+                        <Text style={s.statLabel}>Ventas</Text>
+                        {loading
+                            ? <ActivityIndicator color={theme.primary} />
+                            : <Text style={[s.statValue, { color: theme.positive }]}>{formatColones(totalSales)}</Text>
+                        }
                     </View>
-                    <View style={styles.statCard}>
-                        <Text style={styles.statLabel}>Gastos</Text>
-                        <Text style={[styles.statValue, { color: '#A32D2D' }]}>₡ 0</Text>
+                    <View style={s.statCard}>
+                        <Text style={s.statLabel}>Gastos</Text>
+                        {loading
+                            ? <ActivityIndicator color={theme.primary} />
+                            : <Text style={[s.statValue, { color: theme.negative }]}>{formatColones(totalExpenses)}</Text>
+                        }
                     </View>
                 </View>
 
-                <Text style={styles.sectionTitle}>ACCIONES RÁPIDAS</Text>
+                {!loading && (summary?.pendingReceivables ?? 0) > 0 && (
+                    <View style={[s.statCard, s.receivablesCard]}>
+                        <Text style={s.statLabel}>Por cobrar (total)</Text>
+                        <Text style={[s.statValue, { color: theme.warning }]}>
+                            {formatColones(summary!.pendingReceivables)}
+                        </Text>
+                    </View>
+                )}
 
-                {/* Navigate to create sale screen */}
+                <Text style={s.sectionTitle}>ACCIONES RÁPIDAS</Text>
+
                 <TouchableOpacity
-                    style={styles.primaryButton}
+                    style={s.primaryButton}
                     onPress={() => navigation.navigate('CreateSale')}
                 >
-                    <Text style={styles.primaryButtonText}>+ Registrar venta</Text>
+                    <Ionicons name="add-circle-outline" size={22} color={theme.primaryText} />
+                    <Text style={s.primaryButtonText}>Registrar venta</Text>
                 </TouchableOpacity>
 
-                {/* Navigate to create expense screen */}
                 <TouchableOpacity
-                    style={styles.secondaryButton}
+                    style={s.secondaryButton}
                     onPress={() => navigation.navigate('CreateExpense')}
                 >
-                    <Text style={styles.secondaryButtonText}>− Registrar gasto</Text>
+                    <Ionicons name="cash-outline" size={22} color={theme.textPrimary} />
+                    <Text style={s.secondaryButtonText}>Registrar gasto</Text>
                 </TouchableOpacity>
 
-                {/* Navigate to summary screen */}
                 <TouchableOpacity
-                    style={styles.summaryButton}
+                    style={s.secondaryButton}
+                    onPress={() => navigation.navigate('History')}
+                >
+                    <Ionicons name="time-outline" size={22} color={theme.textPrimary} />
+                    <Text style={s.secondaryButtonText}>Ver historial</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={s.receivablesButton}
+                    onPress={() => navigation.navigate('Receivables')}
+                    activeOpacity={0.8}
+                >
+                    <Ionicons name="wallet-outline" size={22} color={theme.warning} />
+                    <Text style={s.receivablesButtonText}>Cuentas por cobrar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={s.summaryButton}
                     onPress={() => navigation.navigate('Summary')}
                     activeOpacity={0.85}
                 >
-                    <Text style={styles.summaryIcon}>📊</Text>
-                    <Text style={styles.summaryButtonText}>Ver resumen mensual</Text>
+                    <Ionicons name="bar-chart-outline" size={28} color="#fff" />
+                    <Text style={s.summaryButtonText}>Ver resumen de ganancias</Text>
                 </TouchableOpacity>
             </ScrollView>
         </View>
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
+const makeStyles = (theme: Theme) => StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.background },
     content: { padding: 16 },
-    monthLabel: {
-        fontSize: 14,
-        color: '#1a1a2e',
-        fontWeight: '500',
-        marginBottom: 14,
-    },
+    monthLabel: { fontSize: 14, color: theme.textPrimary, fontWeight: '500', marginBottom: 14 },
     mainCard: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.surface,
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
         borderWidth: 0.5,
-        borderColor: '#ddd',
+        borderColor: theme.border,
     },
-    mainCardLabel: { fontSize: 13, color: '#888', marginBottom: 4 },
-    mainCardValue: { fontSize: 28, fontWeight: '500', color: '#0F6E56' },
-    mainCardSub: { fontSize: 12, color: '#888', marginTop: 2 },
-    statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+    mainCardLabel: { fontSize: 13, color: theme.textMuted, marginBottom: 4 },
+    mainCardValue: { fontSize: 28, fontWeight: '500' },
+    mainCardSub: { fontSize: 12, color: theme.textMuted, marginTop: 2 },
+    statsRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
     statCard: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.surface,
         borderRadius: 10,
         padding: 14,
         borderWidth: 0.5,
-        borderColor: '#ddd',
+        borderColor: theme.border,
     },
-    statLabel: { fontSize: 12, color: '#888', marginBottom: 4 },
+    receivablesCard: {
+        flex: 0,
+        marginBottom: 20,
+    },
+    statLabel: { fontSize: 12, color: theme.textMuted, marginBottom: 4 },
     statValue: { fontSize: 20, fontWeight: '500' },
     sectionTitle: {
         fontSize: 12,
-        color: '#888',
+        color: theme.textMuted,
         fontWeight: '500',
         letterSpacing: 0.5,
         marginBottom: 10,
     },
     primaryButton: {
-        backgroundColor: '#1a1a2e',
+        backgroundColor: theme.primary,
         borderRadius: 12,
         padding: 16,
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
         marginBottom: 10,
     },
-    primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '500' },
+    primaryButtonText: { color: theme.primaryText, fontSize: 16, fontWeight: '500' },
     secondaryButton: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.surface,
         borderRadius: 12,
         padding: 16,
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
         borderWidth: 0.5,
-        borderColor: '#ddd',
+        borderColor: theme.border,
         marginBottom: 10,
     },
-    secondaryButtonText: { color: '#1a1a2e', fontSize: 16 },
+    secondaryButtonText: { color: theme.textPrimary, fontSize: 16 },
+    receivablesButton: {
+        backgroundColor: theme.surface,
+        borderRadius: 12,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        borderWidth: 1.5,
+        borderColor: theme.warning,
+        marginBottom: 10,
+        minHeight: 52,
+    },
+    receivablesButtonText: { color: theme.warning, fontSize: 16, fontWeight: '600' },
     summaryButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#1e8449',
+        gap: 12,
+        backgroundColor: theme.positive,
         paddingVertical: 18,
         paddingHorizontal: 24,
         borderRadius: 16,
@@ -139,6 +238,5 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         shadowOffset: { width: 0, height: 2 },
     },
-    summaryIcon: { fontSize: 24, marginRight: 12 },
     summaryButtonText: { fontSize: 20, fontWeight: '700', color: '#fff' },
 });
