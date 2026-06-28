@@ -16,4 +16,8 @@ public class Sale
 
     public int UserId { get; set; }
     public User User { get; set; } = null!;
+
+    public int? CustomerId { get; set; }
+    public Customer? Customer { get; set; }
+    public bool IsCredit { get; set; } = false;
 }

@@ -41,11 +41,11 @@ Full backlog is tracked in Jira — project key **`EA`**.
 
 ## 📱 Screens
 
-- **Inicio (Home)** — quick access grid: two full-width primary actions (Registrar venta / Registrar gasto), a two-column row (Historial / Cuentas por cobrar), and a full-width "Ver Resumen" button.
-- **Registrar venta** — daily sales entry.
+- **Inicio (Home)** — quick access grid with this month's profit, sales, and expenses at a glance; "Por cobrar" warning card when pending receivables exist; primary and secondary action buttons.
+- **Registrar venta** — daily sales entry with optional credit flag and confirm-payment modal.
 - **Registrar gasto** — monthly expense entry, with a category dropdown.
-- **Ver historial** — sales & expenses history *(currently being upgraded — see below)*.
-- **Cuentas por cobrar** — per-customer credit ledger *(planned)*.
+- **Ver historial** — sales & expenses history.
+- **Cobros (Cuentas por cobrar)** — list of outstanding credit sales; tap to mark as paid.
 - **Ver resumen de ganancias** — monthly summary (revenue, expenses, profit).
 
 Navigation is handled through a shared header with a ☰ menu that dynamically lists every screen except the one you're currently on.
@@ -84,18 +84,20 @@ Navigation is handled through a shared header with a ☰ menu that dynamically l
 - [x] Accessibility pass: 52–56px touch targets, 16–18px text, predictable flows
 - [x] Keyboard-handling fixes (Android edge-to-edge, safe-area insets on footer buttons)
 - [x] Dynamic ☰ navigation menu (filters out current screen)
+- [x] Centralized app routes (`appRoutes.ts`) — single source of truth for screen names and icons
 
-## 🔧 In progress
-
-- [ ] History list (sales & expenses) with edit and delete actions
+**Credit & Receivables**
+- [x] Credit sales — `IsCredit` flag + optional customer link on each sale
+- [x] Customer management API (create, list, detail endpoints)
+- [x] Accounts receivable screen — lists outstanding credit sales, mark-as-paid action
+- [x] Home screen "Por cobrar" summary card showing total pending receivables
 
 ## 🗺️ Roadmap
 
 **Sales & Customers**
 - [ ] Sell by unit or kg, in addition to cartons (A = 15 / B = 30)
-- [ ] Optional customer name on sales for detailed tracking
-- [ ] Accounts receivable — per-customer credit ledger ("Cuentas por cobrar")
 - [ ] Abonos — register partial payments against a customer's balance
+- [ ] Per-customer credit ledger detail (full transaction + payment history)
 
 **Reports & Dashboard**
 - [ ] Home dashboard with sales trend charts and KPIs

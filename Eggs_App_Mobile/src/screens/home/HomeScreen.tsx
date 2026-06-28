@@ -101,6 +101,7 @@ export default function HomeScreen({ navigation }: any) {
 
                 <Text style={s.sectionTitle}>ACCIONES RÁPIDAS</Text>
 
+                {/* Full-width primary CTA */}
                 <TouchableOpacity
                     style={s.primaryButton}
                     onPress={() => navigation.navigate('CreateSale')}
@@ -109,39 +110,43 @@ export default function HomeScreen({ navigation }: any) {
                     <Text style={s.primaryButtonText}>Registrar venta</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={s.secondaryButton}
-                    onPress={() => navigation.navigate('CreateExpense')}
-                >
-                    <Ionicons name="cash-outline" size={22} color={theme.textPrimary} />
-                    <Text style={s.secondaryButtonText}>Registrar gasto</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={s.secondaryButton}
-                    onPress={() => navigation.navigate('History')}
-                >
-                    <Ionicons name="time-outline" size={22} color={theme.textPrimary} />
-                    <Text style={s.secondaryButtonText}>Ver historial</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={s.receivablesButton}
-                    onPress={() => navigation.navigate('Receivables')}
-                    activeOpacity={0.8}
-                >
-                    <Ionicons name="wallet-outline" size={22} color={theme.warning} />
-                    <Text style={s.receivablesButtonText}>Cuentas por cobrar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={s.summaryButton}
-                    onPress={() => navigation.navigate('Summary')}
-                    activeOpacity={0.85}
-                >
-                    <Ionicons name="bar-chart-outline" size={28} color="#fff" />
-                    <Text style={s.summaryButtonText}>Ver resumen de ganancias</Text>
-                </TouchableOpacity>
+                {/* 2×2 grid of short secondary buttons — icon stacked above label */}
+                <View style={s.grid}>
+                    <View style={s.gridRow}>
+                        <TouchableOpacity
+                            style={[s.secondaryButton, s.gridButton]}
+                            onPress={() => navigation.navigate('CreateExpense')}
+                        >
+                            <Ionicons name="cash-outline" size={24} color={theme.textPrimary} />
+                            <Text style={s.gridText}>Registrar gasto</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[s.secondaryButton, s.gridButton]}
+                            onPress={() => navigation.navigate('History')}
+                        >
+                            <Ionicons name="time-outline" size={24} color={theme.textPrimary} />
+                            <Text style={s.gridText}>Ver historial</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={s.gridRow}>
+                        <TouchableOpacity
+                            style={[s.receivablesButton, s.gridButton]}
+                            onPress={() => navigation.navigate('Receivables')}
+                            activeOpacity={0.8}
+                        >
+                            <Ionicons name="wallet-outline" size={24} color={theme.warning} />
+                            <Text style={[s.gridText, { color: theme.warning }]}>Cobros</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[s.summaryButton, s.gridButton]}
+                            onPress={() => navigation.navigate('Summary')}
+                            activeOpacity={0.85}
+                        >
+                            <Ionicons name="bar-chart-outline" size={24} color="#fff" />
+                            <Text style={[s.gridText, { color: '#fff' }]}>Resumen General</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </ScrollView>
         </View>
     );
@@ -208,6 +213,24 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         marginBottom: 10,
     },
     secondaryButtonText: { color: theme.textPrimary, fontSize: 16 },
+    grid: { gap: 10 },
+    gridRow: { flexDirection: 'row', gap: 10 },
+    gridButton: {
+        flex: 1,
+        flexDirection: 'column',
+        paddingVertical: 18,
+        paddingHorizontal: 10,
+        marginBottom: 0,
+        marginVertical: 0,
+        minHeight: 80,
+        gap: 6,
+    },
+    gridText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: theme.textPrimary,
+        textAlign: 'center',
+    },
     receivablesButton: {
         backgroundColor: theme.surface,
         borderRadius: 12,

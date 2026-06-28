@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     ActivityIndicator,
     StyleSheet,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { createSale, PaymentStatus } from '../../services/salesService';
 import ScreenHeader from '../../components/ScreenHeader';
-import { KeyboardAwareScreen } from '../../components/KeyboardAwareScreen';
+import { KeyboardAwareScreen, KeyboardAwareScreenHandle } from '../../components/KeyboardAwareScreen';
 import { useFeedback } from '../../hooks/useFeedback';
 import { useTheme } from '../../theme/ThemeContext';
 import { Theme } from '../../theme/colors';
@@ -18,6 +18,7 @@ import ConfirmSaleModal from './ConfirmSaleModal';
 export default function CreateSaleScreen({ navigation }: any) {
     const { theme } = useTheme();
     const { showError, showSuccess, FeedbackUI } = useFeedback();
+    const kbAwareRef = useRef<KeyboardAwareScreenHandle>(null);
     const [cartonType, setCartonType] = useState<15 | 30>(15);
     const [quantity, setQuantity] = useState('');
     const [price, setPrice] = useState('');
@@ -73,6 +74,7 @@ export default function CreateSaleScreen({ navigation }: any) {
             <ScreenHeader title="Registrar venta" />
 
             <KeyboardAwareScreen
+                ref={kbAwareRef}
                 contentContainerStyle={s.content}
                 footer={
                     <>
@@ -127,6 +129,7 @@ export default function CreateSaleScreen({ navigation }: any) {
                     keyboardType="numeric"
                     value={quantity}
                     onChangeText={setQuantity}
+                    onFocus={() => kbAwareRef.current?.scrollFocusedIntoView()}
                 />
 
                 <Text style={s.label}>Precio por cartón (₡)</Text>
@@ -137,6 +140,7 @@ export default function CreateSaleScreen({ navigation }: any) {
                     keyboardType="numeric"
                     value={price}
                     onChangeText={setPrice}
+                    onFocus={() => kbAwareRef.current?.scrollFocusedIntoView()}
                 />
 
                 {total > 0 && (

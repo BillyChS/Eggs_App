@@ -9,5 +9,7 @@
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public ICollection<Sale> Sales { get; set; } = [];
         public ICollection<Expense> Expenses { get; set; } = [];
+        public ICollection<Customer> Customers { get; set; } = [];
+        public ICollection<Abono> Abonos { get; set; } = [];
     }
 }

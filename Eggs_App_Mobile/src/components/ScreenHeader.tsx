@@ -1,9 +1,10 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
     Modal,
     Pressable,
+    ScrollView,
     StyleSheet,
     Switch,
     Text,
@@ -14,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
 import { Theme } from '../theme/colors';
+import { APP_ROUTES } from '../navigation/appRoutes';
 
 interface Props {
     title: string;
@@ -22,15 +24,24 @@ interface Props {
 
 export default function ScreenHeader({ title, showBack = true }: Props) {
     const navigation = useNavigation<any>();
+    const route = useRoute();
     const insets = useSafeAreaInsets();
     const { logout } = useAuth();
     const { theme, isDark, setMode } = useTheme();
     const [menuOpen, setMenuOpen] = useState(false);
     const s = makeStyles(theme);
 
+    // Filter out the screen the user is currently on so it never appears in the list.
+    const navItems = APP_ROUTES.filter((r) => r.name !== route.name);
+
     const handleLogout = () => {
         setMenuOpen(false);
         logout();
+    };
+
+    const handleNavigate = (screenName: string) => {
+        setMenuOpen(false);
+        navigation.navigate(screenName);
     };
 
     return (
@@ -53,7 +64,9 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
                 onRequestClose={() => setMenuOpen(false)}
             >
                 <Pressable style={s.overlay} onPress={() => setMenuOpen(false)}>
-                    <View style={[s.menuCard, { top: insets.top + 56 }]}>
+                    {/* Inner Pressable stops tap-through so the card doesn't close on its own taps */}
+                    <Pressable style={[s.menuCard, { top: insets.top + 56 }]}>
+                        {/* Dark mode toggle — always visible */}
                         <View style={s.menuItem}>
                             <View style={s.menuItemContent}>
                                 <Ionicons
@@ -72,20 +85,30 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
                                 thumbColor={theme.surface}
                             />
                         </View>
-                        {showBack && (
-                            <>
-                                <View style={s.menuDivider} />
+
+                        {/* Navigation destinations — current screen is excluded */}
+                        <View style={s.menuDivider} />
+                        <ScrollView
+                            bounces={false}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            {navItems.map((item) => (
                                 <TouchableOpacity
+                                    key={item.name}
                                     style={s.menuItem}
-                                    onPress={() => { setMenuOpen(false); navigation.navigate('Home'); }}
+                                    onPress={() => handleNavigate(item.name)}
+                                    activeOpacity={0.7}
                                 >
                                     <View style={s.menuItemContent}>
-                                        <Ionicons name="home-outline" size={20} color={theme.textPrimary} />
-                                        <Text style={s.menuItemText}>Inicio</Text>
+                                        <Ionicons name={item.icon} size={20} color={theme.textPrimary} />
+                                        <Text style={s.menuItemText}>{item.label}</Text>
                                     </View>
                                 </TouchableOpacity>
-                            </>
-                        )}
+                            ))}
+                        </ScrollView>
+
+                        {/* Logout — always at the bottom */}
                         <View style={s.menuDivider} />
                         <TouchableOpacity style={s.menuItem} onPress={handleLogout}>
                             <View style={s.menuItemContent}>
@@ -93,7 +116,7 @@ export default function ScreenHeader({ title, showBack = true }: Props) {
                                 <Text style={s.menuItemText}>Cerrar sesión</Text>
                             </View>
                         </TouchableOpacity>
-                    </View>
+                    </Pressable>
                 </Pressable>
             </Modal>
 
@@ -131,7 +154,8 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
         backgroundColor: theme.surface,
         borderRadius: 12,
         paddingVertical: 6,
-        minWidth: 220,
+        minWidth: 260,
+        maxHeight: '75%',
         elevation: 6,
         shadowColor: '#000',
         shadowOpacity: 0.2,
