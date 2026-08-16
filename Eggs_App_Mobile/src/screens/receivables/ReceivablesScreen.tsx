@@ -311,7 +311,7 @@ export default function ReceivablesScreen() {
                                                 onPress={() => openAbonoModal(sale.id, sale.remainingBalance)}
                                                 activeOpacity={0.75}
                                             >
-                                                <Ionicons name="add-circle-outline" size={18} color={theme.primary} />
+                                                <Ionicons name="add-circle-outline" size={24} color={theme.primary} />
                                                 <Text style={s.abonoBtnText}>Registrar abono</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity
@@ -319,7 +319,7 @@ export default function ReceivablesScreen() {
                                                 onPress={() => handleMarkAsPaid(sale.id, sale.remainingBalance)}
                                                 activeOpacity={0.75}
                                             >
-                                                <Ionicons name="cash-outline" size={18} color={theme.primaryText} />
+                                                <Ionicons name="cash-outline" size={24} color={theme.primaryText} />
                                                 <Text style={s.payBtnText}>Pagar todo</Text>
                                             </TouchableOpacity>
                                         </View>
@@ -506,30 +506,32 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     abonoList: { marginBottom: 10 },
     abonoEntry: { fontSize: 13, color: theme.textMuted, marginBottom: 2 },
 
-    saleActions: { flexDirection: 'row', gap: 8 },
+    saleActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
     abonoBtn: {
         flex: 1,
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderColor: theme.primary,
-        borderRadius: 10,
-        paddingVertical: 10,
+        borderRadius: 12,
+        paddingVertical: 14,
+        minHeight: 64,
     },
-    abonoBtnText: { color: theme.primary, fontSize: 14, fontWeight: '600' },
+    abonoBtnText: { color: theme.primary, fontSize: 16, fontWeight: '700' },
     payBtn: {
         flex: 1,
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
         backgroundColor: theme.primary,
-        borderRadius: 10,
-        paddingVertical: 10,
+        borderRadius: 12,
+        paddingVertical: 14,
+        minHeight: 64,
     },
-    payBtnText: { color: theme.primaryText, fontSize: 14, fontWeight: '600' },
+    payBtnText: { color: theme.primaryText, fontSize: 16, fontWeight: '700' },
 
     // Abono modal
     abonoOverlay: {

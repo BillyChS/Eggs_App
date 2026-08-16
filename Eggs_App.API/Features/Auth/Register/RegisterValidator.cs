@@ -13,5 +13,9 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("La contraseña es requerida.")
             .MinimumLength(6).WithMessage("La contraseña debe tener al menos 6 caracteres.");
+
+        RuleFor(x => x.Role)
+            .Must(role => role is "Admin" or "User")
+            .WithMessage("El rol debe ser 'Admin' o 'User'.");
     }
 }
